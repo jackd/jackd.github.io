@@ -309,4 +309,4 @@ Things get trickier if we need to apply the `map` before the `batch`, but I'll l
 
 As we've seen, there's a lot more to deterministic data augmentation than just setting seeds. Having said that, hopefully this article has demonstrated that tnesorflow provides all the tools to write deterministic, pre-emptible, performant and maintainable pipelines.
 
-_Think I'm wrong? Found a typo or bug? Have a question or just think something needs further explanation? Let me know in the comments._
+<!-- _Think I'm wrong? Found a typo or bug? Have a question or just think something needs further explanation? Let me know in the comments._ -->

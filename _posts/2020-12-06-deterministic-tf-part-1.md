@@ -367,7 +367,7 @@ The above functionality is all implemented in my [kblocks](https://github.com/ja
 
 As we've seen, there's a lot more to deterministic and pre-emptible training than just setting the random seed and adding a [BackupAndRestore][backup-and-restore].
 
-_Think I'm wrong? Found a typo or bug? Have a question or just think something needs further explanation? Let me know in the comments._
+<!-- _Think I'm wrong? Found a typo or bug? Have a question or just think something needs further explanation? Let me know in the comments._ -->
 
 [callback]: https://www.tensorflow.org/api_docs/python/tf/keras/callbacks/Callback
 [reduce-lr-on-plateau]: https://www.tensorflow.org/api_docs/python/tf/keras/callbacks/ReduceLROnPlateau
