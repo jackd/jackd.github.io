@@ -19,7 +19,7 @@ Image convolutions have been a cornerstone of a great number of deep learning ad
 
 ## IGE-Net: Inverse Graphics Energy Networks for Human Pose Estimation and Single-View Reconstruction (CVPR 2019)
 
-[Paper](http://openaccess.thecvf.com/content_CVPR_2019/papers/Jack_IGE-Net_Inverse_Graphics_Energy_Networks_for_Human_Pose_Estimation_and_CVPR_2019_paper.pdf) | [Code](https://github.com/jackd/ige) | [Poster](images/ige-poster.pdf)
+[Paper](http://openaccess.thecvf.com/content_CVPR_2019/papers/Jack_IGE-Net_Inverse_Graphics_Energy_Networks_for_Human_Pose_Estimation_and_CVPR_2019_paper.pdf) | [Code](https://github.com/jackd/ige) | [Poster](assets/posters/ige.pdf)
 
 Inferring 3D scene information from 2D observations is an open problem in computer vision. We propose using a deep-learning based energy minimization framework to learn a consistency measure between 2D observations and a proposed world model, and demonstrate that this framework can be trained end-to-end to produce consistent and realistic inferences. We evaluate the framework on human pose estimation and voxel-based object reconstruction benchmarks and show competitive results can be achieved with relatively shallow networks with drastically fewer learned parameters and floating point operations than conventional deep-learning approaches.
 

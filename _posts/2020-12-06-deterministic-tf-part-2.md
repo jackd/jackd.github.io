@@ -74,7 +74,7 @@ for _ in range(epochs):
 # [0.27331388,  1.1708031, 2.8691258, 3.7368858, 4.750617]
 ```
 
-The second involves managing random state explicitly using [tf.random.Generator](generator)s. Note this is the approach [encouraged by tensorflow for random number generation](https://www.tensorflow.org/guide/random_numbers) moving forward.
+The second involves managing random state explicitly using [tf.random.Generator](https://www.tensorflow.org/api_docs/python/tf/random/Generator)s. Note this is the approach [encouraged by tensorflow for random number generation](https://www.tensorflow.org/guide/random_numbers) moving forward.
 
 ```python
 def rng_map_func(x):
