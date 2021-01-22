@@ -107,7 +107,7 @@ By noting the $F \circ E = \mathbf{1} - I$, taking the Hadamard product of equat
     \label{eqn:troublesome}
 \end{equation}
 
-While everything on the right is straight-forward to compute, the Hadamard product on the left presents difficulties. [Giles](giles) proposes choosing scales of the eigenvectors such that the diagonal of $\Winv \dW$ are zero, though does not discuss how to compute such a scale. Note that contrary to the claims of [Boeddeker _et al._](boedekker), using normalized eigenvectors (or more generally, eigenvectors of fixed magnitude) does _not_ guarantee this property.
+While everything on the right is straight-forward to compute, the Hadamard product on the left presents difficulties. [Giles][giles] proposes choosing scales of the eigenvectors such that the diagonal of $\Winv \dW$ are zero, though does not discuss how to compute such a scale. Note that contrary to the claims of [Boeddeker _et al._][boedekker], using normalized eigenvectors (or more generally, eigenvectors of fixed magnitude) does _not_ guarantee this property.
 
 We make no effort to resolve this for the general case. We argue that use-cases of eigenvectors should be invariant to this scaling, and derivatives would likely be computed more easily with respect to these quantities instead. For the interested reader, a good discussion of the problem is given [here](https://re-ra.xyz/Gauge-Problem-in-Automatic-Differentiation/).
 
