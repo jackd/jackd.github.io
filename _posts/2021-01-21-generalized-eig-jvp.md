@@ -17,6 +17,18 @@ window.MathJax = {
 };
 </script>
 
+The eigenvector problem is ubiquitous in many areas of mathematics, physics and computer science. I recently found myself needing the solution to the generalized eigenvalue problem and discovered an implementation doesn't exist in [jax][jax]. While wrapping [low-level cuda code](https://docs.nvidia.com/cuda/cusolver/index.html#sygvd-example1) is mechanical enough, this doesn't help with one of the core features of jax: auto-differentiation.
+
+A naive solution would be to re-write the algorithm that generates the decomposition. While this would get us a differentiable solution, it would suffer some major flaws. Most obviously:
+
+* we'd have more code to maintain;
+* it likely would not be as efficient as the CUDA implementation; and
+* the automatically calculated derivatives would still be sub-optimal.
+
+Instead, we're going to calculate derivatives using _implicit differentiation_. This is hardly a new idea, and there are numerous sources detailing results for the standard eigenvalue problem. That said, I was unable to find anything on the generalized problem. In this post, we'll start by formally defining the problem, before adapting the approach of [Boeddeker _et al._][boeddeker] to the generalized problem. In doing so, we identify what we believe to be a flaw in their solution, though identity a work-around for the self-adjoint case. A good understanding of the basics of linear algebra and calculus is assumed.
+
+## Problem Description
+
 <div>
 \(\newcommand{\pd}[1]{\frac{\partial {#1}}{\partial \xi}}\)
 \(\newcommand{\A}{\mathbf{\Phi}}\)
@@ -33,18 +45,6 @@ window.MathJax = {
 \(\newcommand{\Re}{\mathbb{R}e}\)
 \(\newcommand{\Im}{\mathbb{I}m}\)
 </div>
-
-The eigenvector problem is ubiquitous in many areas of mathematics, physics and computer science. I recently found myself needing the solution to the generalized eigenvalue problem and discovered an implementation doesn't exist in [jax][jax]. While wrapping [low-level cuda code](https://docs.nvidia.com/cuda/cusolver/index.html#sygvd-example1) is mechanical enough, this doesn't help with one of the core features of jax: auto-differentiation.
-
-A naive solution would be to re-write the algorithm that generates the decomposition. While this would get us a differentiable solution, it would suffer some major flaws. Most obviously:
-
-* we'd have more code to maintain;
-* it likely would not be as efficient as the CUDA implementation; and
-* the automatically calculated derivatives would still be sub-optimal.
-
-Instead, we're going to calculate derivatives using _implicit differentiation_. This is hardly a new idea, and there are numerous sources detailing results for the standard eigenvalue problem. That said, I was unable to find anything on the generalized problem. In this post, we'll start by formally defining the problem, before adapting the approach of [Boeddeker _et al._][boeddeker] to the generalized problem. In doing so, we identify what we believe to be a flaw in their solution, though identity a work-around for the self-adjoint case. A good understanding of the basics of linear algebra and calculus is assumed.
-
-## Problem Description
 
 We consider the problem of computing partial derivatives of $W$ and $\Lambda$ given the solution to the generalized eigenvalue and all other relevant partial derivatives. We start with the definition of the solutions to the problem, i.e.
 
