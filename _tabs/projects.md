@@ -7,6 +7,7 @@ order: 2
 
 ## Tensorfow Utilities
 
+- [tfbm](https://github.com/jackd/tfbm): High level decorator-based interface and CLI and tensorflow benchmarks.
 - [kblocks](https://github.com/jackd/kblocks): Keras blocks with dependency injection and an efficient, dynamically configurable CLI.
 - [meta-model](https://github.com/jackd/meta-model): A framework for simultaneously building data map functions and learned models for model-dependent data preprocessing pipelines.
 - [tfrng](https://github.com/jackd/tfrng): Unified interface for different random number generation implementations and transforms for deterministic pipelines.
