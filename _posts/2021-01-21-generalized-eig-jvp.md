@@ -46,7 +46,7 @@ Instead, we're going to calculate derivatives using _implicit differentiation_. 
 \(\newcommand{\Im}{\mathbb{I}m}\)
 </div>
 
-We consider the problem of computing partial derivatives of $W$ and $\Lambda$ given the solution to the generalized eigenvalue and all other relevant partial derivatives. We start with the definition of the solutions to the problem, i.e.
+We consider the problem of computing partial derivatives of $\W$ and $\V$ given the solution to the generalized eigenvalue and all other relevant partial derivatives. We start with the definition of the solutions to the problem, i.e.
 
 \begin{equation}
     \A\W = \B \W \V,
@@ -140,7 +140,7 @@ Since the first and third term are Hermitian transposes of each other, their com
 \end{equation}
 </div>
 
-Alas, this does not help us in evaluating the imaginary part. We do still have some freedom however: it can be shown if $\Lambda, \W$ is a solution to the problem and satisfies the described orthogonality constraint, then $\Lambda \mathbf{R}(\Theta)$ is also a solution, where $\mathbf{R}(\Theta)$ is a diagonal matrix with entries given by rotations in the complex plan, $R_{jj} = e^{i\theta_j}$. Exactly how we define $\theta_j$ in such a way that makes the remaining troublesome term computable is left to the reader (i.e. I've spent entirely too long trying and got nowhere).
+Alas, this does not help us in evaluating the imaginary part. We do still have some freedom however: it can be shown if $\V, \W$ is a solution to the problem and satisfies the described orthogonality constraint, then $\V \mathbf{R}(\Theta)$ is also a solution, where $\mathbf{R}(\Theta)$ is a diagonal matrix with entries given by rotations in the complex plan, $R_{jj} = e^{i\theta_j}$. Exactly how we define $\theta_j$ in such a way that makes the remaining troublesome term computable is left to the reader (i.e. I've spent entirely too long trying and got nowhere).
 
 ## Real Symmetric Case
 
