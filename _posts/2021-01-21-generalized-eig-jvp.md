@@ -31,10 +31,10 @@ Instead, we're going to calculate derivatives using _implicit differentiation_. 
 
 <div>
 \(\newcommand{\pd}[1]{\frac{\partial {#1}}{\partial \xi}}\)
-\(\newcommand{\A}{\mathbf{\Phi}}\)
-\(\newcommand{\B}{\mathbf{\Psi}}\)
+\(\newcommand{\A}{\mathbf{A}}\)
+\(\newcommand{\B}{\mathbf{B}}\)
 \(\newcommand{\W}{\mathbf{W}}  % vectors\)
-\(\newcommand{\V}{\mathbf{\Lambda}}  % values\)
+\(\newcommand{\V}{\mathbf{V}}  % values\)
 \(\newcommand{\dA}{\pd{\A}}\)
 \(\newcommand{\dB}{\pd{\B}}\)
 \(\newcommand{\dW}{\pd{\W}}\)
@@ -79,7 +79,7 @@ Expanding and simplifying the first term on the right and shifting the second te
     \Winv \Binv \dA \W = \Winv \dW \V - \V \Winv \dW + \Winv \Binv \dB \W \V + \dV
 \end{equation}
 
-We can simplify the first two terms on the right by applying the identity $AD - DA = E \circ A$ for a diagonal matrix $D$, where $e_{ij} = d_ii - d_jj$ and $\circ$ denotes the Hadamard (element-wise) product.
+We can simplify the first two terms on the right by applying the identity $AD - DA = E \circ A$ for a diagonal matrix $D$, where $e_{ij} = d_{ii} - d_{jj}$ and $\circ$ denotes the Hadamard (element-wise) product.
 
 \begin{equation}
     \Winv \Binv \dA \W = E \circ \Winv \dW + \Winv \Binv \dB \W \V + \dV
