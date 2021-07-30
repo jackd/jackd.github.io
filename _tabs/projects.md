@@ -5,6 +5,13 @@ order: 2
 
 ---
 
+## JAX Projects
+
+- [huf](https://github.com/jackd/huf): [haiku](https://github.com/deepmind/dm-haiku) utilities and framework.
+- [spax](https://github.com/jackd/spax): Sparse operations and utilities.
+- [grax](https://github.com/jackd/grax): Graph neural network implementations.
+- [deqx](https://github.com/jackd/deqx): [Deep Equilibrium](https://arxiv.org/abs/1909.01377) operations and haiku modules.
+
 ## Tensorfow Utilities
 
 - [tfbm](https://github.com/jackd/tfbm): High level decorator-based interface and CLI and tensorflow benchmarks.
