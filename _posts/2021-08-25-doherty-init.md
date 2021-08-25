@@ -6,7 +6,11 @@ categories: [Modelling]
 tags: [covid, epidemiology]
 ---
 
-The Doherty institute recently released a [report](https://www.doherty.edu.au/uploads/content_doc/DohertyModelling_NationalPlan_and_Addendum_20210810.pdf) that led to an agreement between state and federal leaders about a roadmap to transition out of lockdown-management of covid19. Models looked at a variety of scenarios by simulating outbreaks with 30 infected individuals. A thus-far uncontrolled outbreak in Sydney has prompted many state leaders to back away from this roadmap, pointing out that since the numbers are unlikely to get back down to match the simulated initial conditions the models must be revisited. This prompted [comments](https://www.abc.net.au/news/2021-08-24/head-of-doherty-institute-covid19-nsw-vaccine-vic-scott-morrison/100401082) from Director of the Doherty Institute Sharon Lewin on ABC's [The Drum](https://iview.abc.net.au/video/NC2107H146S00):
+The Doherty institute recently released a [report](https://www.doherty.edu.au/uploads/content_doc/DohertyModelling_NationalPlan_and_Addendum_20210810.pdf) that led to an agreement between state and federal leaders about a roadmap to transition out of lockdown-management of covid19. Models looked at a variety of scenarios by simulating outbreaks with 30 infected individuals. The current outbreak in Sydney has prompted many state leaders to back away from this roadmap, pointing out that since the numbers are unlikely to get back down to match the simulated initial conditions the models must be revisited. The Prime Minister hit back, [stating](https://www.theguardian.com/australia-news/2021/aug/23/scott-morrison-tells-states-they-need-to-honour-covid-deal-with-all-australians-to-reopen):
+
+> "The starting point does not influence the overall conclusions of the model." - Scott Morrison, Prime Minister
+
+The director of the Doherty Institute Sharon Lewin reinforced these statements on ABC's [The Drum](https://iview.abc.net.au/video/NC2107H146S00), claiming:
 
 - "There really is no difference with how the model predicted outcomes... whether you start at 30 cases or 800 cases."
 - "The trajectory is thought, and modelled, and predicted to be the same as what was in the original report."
@@ -14,13 +18,16 @@ The Doherty institute recently released a [report](https://www.doherty.edu.au/up
 - "Whether you start at 30 cases or 800 cases, you can still open up safely."
 - "The model which was published and is widely available is applicable to whether you start with 30 cases or 800... the model still holds whether you start on low numbers or high numbers."
 
-Having recently looked into the Doherty modelling, these statements surprised me, so I decided to investigate further.
+Having recently looked into the Doherty modelling, these statements surprised me. I decided to investigate further.
 
 ## TL;DR
 
 - Basic modelling shows total case numbers should be roughly proportional to the initial infections assuming optimal contact tracing assumptions and continued vaccinations.
-- Figures from the Doherty report indicate opening at 800 initial cases even with 75-80% vaccination would lead to an order of magnitude more cases than opening at 30 cases with 70% vaccination.
+- Figures from the Doherty report indicate opening at 800 initial cases with 70% vaccination would be worse than opening at 50% vaccination and 30 cases.
 - Optimal contact tracing would be significantly more difficult with more initial cases, leading to a regime change resulting in orders of magnitude more cases.
+- Results in the Doherty report indicate that relaxing restrictions at 70% vaccination depend on the initial number of cases:
+  - 30: peak daily cases around 200, negligible ICU admissions, less than 1 death per day.
+  - 800: peak daily cases around 1,000,000, ICU capacity break, peak deaths over 100 per day.
 
 ## Disclaimer
 
@@ -68,13 +75,15 @@ The Doherty models are considerably more complex than this. However, I see no re
 
 ![Infections opening up at 70% and 50% vaccination, optimal TTIQ](/assets/img/posts/doherty/infections-edit.png)
 
-My edits in red attempt to illustrate that we would expect to see similar numbers of cases if we started with 800 cases and an initial vaccination rate of 75-80% and result in an order of magnitude more cases than the baseline. Presumably opening with 70% vaccination and 800 cases would lead to an even bigger difference.
+My edits in red attempt to illustrate that we would expect to see similar numbers of cases if we started with 800 cases and an initial vaccination rate of 75-80% and result in an order of magnitude more cases than the baseline (you could use the wider confidence interval associated with the light blue area and get 72% to something-bigger-than-80% if you'd prefer - the conclusions are the same). Presumably opening with the lower vaccination rate of 70% with this number of cases would lead larger infection counts.
+
+In layman's terms, opening up at 70% vaccination rate and 800 cases is projected to be worse than opening up at 50% vaccination rate and 30 cases.
 
 ## Trace, Test, Isolate and Quarantine (TTIQ)
 
 A large amount of the modelling relates to the effectiveness of TTIQ measures, and Lewin is transparent about the uncertainty, stating, "What is less certain is how the test, trace and isolate system can keep up when you have hundreds of cases compared to 10s of cases". Before we get into the details of how higher initial case numbers might affect TTIQ effectiveness, it's worth summarising what the report says about the impact on optimal vs partial TTIQ effectiveness.
 
-Firstly, in order to hold infection counts stable at 70% vaccination rate, the model predicts high-level restrictions would be needed 22% of the time with partial TTIQ, whereas these high level restrictions would be rarely required if at all with optimal TTIQ. They also run simulations without any restrictions starting from 70% vaccination.
+Firstly, in order to hold infection counts stable at 70% vaccination rate, the model predicts high-level restrictions would be needed 22% of the time with partial TTIQ, whereas these high level restrictions would be rarely required if at all with optimal TTIQ. They also run simulations without any non-pharmacological public health interventions starting from 70% vaccination.
 
 ![Infection rates with partial TTIQ](/assets/img/posts/doherty/infections-70-ttiq.png)
 
@@ -85,7 +94,7 @@ Having established the importance of TTIQ effectiveness, let's now look at how i
 - 'Optimal' TTIQ response, deemed achievable when active case numbers can be contained in the order of 10s or 100s; and
 - 'Partial' TTIQ response, deemed more likely when established community transmission leads to rapid escalation of caseloads in the 1,000s or beyond.
 
-In order to relate this definition to Lewin's statements, the question becomes: is 800 closer to "10s or 100s" or "1000s or beyond"? While most people would say 800 is in "10s or 100s", there's a strong mathematical argument that it's closer to "1,000s or beyond" (800 is 8x larger than 100, but only 1.25x smaller than 1,000). Having said that, whether or not 800 counts as 100s or 1,000s isn't really the point - the real question is whether our TTIQ systems can perform optimally with these numbers.
+In order to relate this definition to Lewin's statements, the question becomes: is 800 closer to "10s or 100s" or "1000s or beyond"? While most people would say 800 is in "10s or 100s", there's a strong mathematical argument that it's closer to "1,000s or beyond" (800 is 8x larger than 100, but only 1.25x smaller than 1,000). Having said that, whether or not 800 counts as being in the 100s or 1,000s isn't really the point - the real question is whether our TTIQ systems can perform optimally with these numbers.
 
 To answer this, let's consider the outbreaks currently affecting our two largest cities:
 
@@ -94,10 +103,25 @@ To answer this, let's consider the outbreaks currently affecting our two largest
 
 This indicates to me that Melbourne is pushing the limits of optimality for it's contact tracing, while NSW has long since exceeded it. It seems implausible to me that an outbreak starting at 800 and modelled to grow by at least an order of magnitude would not exceed optimal TTIQ capacity.
 
+## Putting it all Together
+
+Let's put this all together and see what the Doherty report might say about relaxing restrictions at 70% with 800 daily infections. As discussed previously, according to the discussion in the report, trajectories should be worse than those presented for opening at 50% vaccination and 30 daily infections. Regarding TTIQ, the Doherty report gives us one final gem to support the hypothesis that optimal TTIQ is unlikely:
+
+> "... rapid epidemic growth is expected at 50 and 60% coverage... In these scenarios reduced effectiveness of the public health 'test, trace, isolate,
+quarantine' (TTIQ) response is anticipated due to high caseloads." - Doherty Report, Executive Summary
+
+So an outbreak seeded at 70% vaccination with 800 cases is worse than an outbreak seeded at 50% vaccination with 30 cases, and such an outbreak will not have optimal TTIQ effectiveness. To understand the effect of the initial outbreak size, let's compare the 70% optimal TTIQ trajectory to that starting at 50% vaccination with partial TTIQ. All the following are from the Doherty report using the transmission reducing strategy.
+
+![The difference between 30 and 800 initial cases](/assets/img/posts/doherty/trajectories.png)
+
+To summarise, opening with 70% vaccination at 800 cases rather than 30 cases would lead to:
+
+- a roughly 5000-fold increase in peak daily cases;
+- ICU capacity being exceeded; and
+- hundreds of deaths per day.
+
+Now an argument could be made that the TTIQ system may operate optimally initially before breaking down as case numbers increase. A more sophisticated TTIQ model that allowed for changing effectiveness over time might yield less extreme results, but improving on the Doherty model is beyond the scope of this discussion. The point is: the 25-fold increase in daily case numbers due to increased initial outbreak size will compound with the 200-fold increase in reduced TTIQ effectiveness due to higher daily rates, and this massive increase in daily cases will have knock-on effects to ICU admissions and ultimately deaths (the fact it compounds so perfectly - i.e. 25 x 200 = 5000 - surprised even me).
+
 ## Conclusions
 
-Assuming restrictions are eased while vaccinations are ongoing and all else being equal, outbreaks will result in both total and peak case counts roughly proportional to the number of initial cases. In other words, while the shape of the infection curve over time might look the same whether outbreaks begin at 30 cases or 800, the scale will be different by a factor close to 25.
-
-This increase in cases will result in a significantly more difficult contact tracing effort, likely resulting in reduced effectiveness and snowballing into further cases. The report shows this reduced effectiveness alone could result in a 200-fold increase.
-
-Quantitative estimates of how much these factors would compound are difficult, but one thing should be clear: the number of infections at the time restrictions are lifted has a VERY large impact on the trajectory of the resulting outbreak. I see no way of reconciling these observations with Lewin's statements.
+Low initial case numbers give us additional time to vaccinate more individuals. Basic modelling shows daily infections rates should be roughly proportional to size of the initial outbreak. Larger initial outbreaks lead to larger daily case counts which cascade into reduced contact-tracing effectiveness and a further increase in case rates. While the difference between 30 daily infections and 800 might not seem large, in the context of relaxing restrictions at 70% the Doherty model the consequences could hardly be starker. I see no way of reconciling these observations with the statements of Lewin or the Prime Minister.
