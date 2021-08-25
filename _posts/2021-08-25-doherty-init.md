@@ -63,7 +63,7 @@ Like in the base SIR model we still see growth followed by a plateau and eventua
 
 This results in a 25-fold increase in the number of cases as a result of the 26-fold increase in initial cases.
 
-So what's going on here? Well, wWe've already established that in the no-vaccination case a smaller number of initial infections is equivalent to a lag in time. With daily vaccinations, that lag gives us time to significantly increase the overall vaccination rate.
+So what's going on here? Well, we've already established that in the no-vaccination case a smaller number of initial infections is equivalent to a lag in time. With daily vaccinations, that lag gives us time to significantly increase the overall vaccination rate.
 
 This linear relationship is exactly what we would expect in an environment where daily vaccinations greatly outnumber infections. To make this even more clear, we can plot the total number of infections compared to the initial outbreak size.
 
@@ -75,13 +75,13 @@ The Doherty models are considerably more complex than this. However, I see no re
 
 ![Infections opening up at 70% and 50% vaccination, optimal TTIQ](/assets/img/posts/doherty/infections-edit.png)
 
-My edits in red attempt to illustrate that we would expect to see similar numbers of cases if we started with 800 cases and an initial vaccination rate of 75-80% and result in an order of magnitude more cases than the baseline (you could use the wider confidence interval associated with the light blue area and get 72% to something-bigger-than-80% if you'd prefer - the conclusions are the same). Presumably opening with the lower vaccination rate of 70% with this number of cases would lead larger infection counts.
+My edits in red attempt to illustrate that we would expect to see similar numbers of cases if we started with 800 cases and an initial vaccination rate of 75-80% and result in an order of magnitude more cases than the baseline (you could use the wider confidence interval associated with the light blue area and get 72% to something-bigger-than-80% if you'd prefer - the conclusions are the same). Presumably opening with the lower vaccination rate of 70% with 800 cases would lead to more infections still.
 
 In layman's terms, opening up at 70% vaccination rate and 800 cases is projected to be worse than opening up at 50% vaccination rate and 30 cases.
 
 ## Trace, Test, Isolate and Quarantine (TTIQ)
 
-A large amount of the modelling relates to the effectiveness of TTIQ measures, and Lewin is transparent about the uncertainty, stating, "What is less certain is how the test, trace and isolate system can keep up when you have hundreds of cases compared to 10s of cases". Before we get into the details of how higher initial case numbers might affect TTIQ effectiveness, it's worth summarising what the report says about the impact on optimal vs partial TTIQ effectiveness.
+A large amount of the modelling relates to the effectiveness of TTIQ measures, and Lewin is transparent about the uncertainty, stating, "What is less certain is how the test, trace and isolate system can keep up when you have hundreds of cases compared to 10s of cases". Before we get into the details of how higher initial case numbers might affect TTIQ effectiveness, it's worth summarising what the report says about the impact of optimal vs partial TTIQ effectiveness.
 
 Firstly, in order to hold infection counts stable at 70% vaccination rate, the model predicts high-level restrictions would be needed 22% of the time with partial TTIQ, whereas these high level restrictions would be rarely required if at all with optimal TTIQ. They also run simulations without any non-pharmacological public health interventions starting from 70% vaccination.
 
