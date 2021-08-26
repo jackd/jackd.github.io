@@ -25,9 +25,9 @@ Having recently looked into the Doherty modelling, these statements surprised me
 - Basic modelling shows total case numbers should be roughly proportional to the initial infections assuming optimal contact tracing assumptions and continued vaccinations.
 - Figures from the Doherty report indicate opening at 800 initial cases with 70% vaccination would be worse than opening at 50% vaccination and 30 cases.
 - Optimal contact tracing would be significantly more difficult with more initial cases, leading to a regime change resulting in orders of magnitude more cases.
-- Results in the Doherty report indicate that relaxing restrictions at 70% vaccination depend on the initial number of cases:
-  - 30: peak daily cases around 200, negligible ICU admissions, less than 1 death per day.
-  - 800: peak daily cases around 1,000,000, ICU capacity break, peak deaths over 100 per day.
+- Results in the Doherty report indicate that consequences of relaxing restrictions at 70% vaccination depend on the initial number of cases:
+  - 30: peak daily cases around 200, negligible ICU admissions, 0 or 1 deaths per day.
+  - 800: peak daily cases around 1,000,000, ICU capacity breached, peak deaths over 100 per day.
 
 ## Disclaimer
 
@@ -77,7 +77,7 @@ The Doherty models are considerably more complex than this. However, I see no re
 
 My edits in red attempt to illustrate that we would expect to see similar numbers of cases if we started with 800 cases and an initial vaccination rate of 75-80% and result in an order of magnitude more cases than the baseline (you could use the wider confidence interval associated with the light blue area and get 72% to something-bigger-than-80% if you'd prefer - the conclusions are the same). Presumably opening with the lower vaccination rate of 70% with 800 cases would lead to more infections still.
 
-In layman's terms, opening up at 70% vaccination rate and 800 cases is projected to be worse than opening up at 50% vaccination rate and 30 cases.
+In layman's terms, if we opened up at 50% vaccination with 30 cases, we could increase vaccination rates to 75-80% in the time it takes for cases to grow from 30 to 800. This would result in _fewer_ cases than opening at 70% vaccination with 800 cases.
 
 ## Trace, Test, Isolate and Quarantine (TTIQ)
 
