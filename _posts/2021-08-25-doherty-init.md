@@ -27,7 +27,7 @@ Having recently looked into the Doherty modelling, these statements surprised me
 - Optimal contact tracing would be significantly more difficult with more initial cases, leading to a regime change resulting in orders of magnitude more cases.
 - Results in the Doherty report indicate that consequences of relaxing restrictions at 70% vaccination depend on the initial number of cases:
   - 30: peak daily cases around 200, negligible ICU admissions, 0 or 1 deaths per day.
-  - 800: peak daily cases around 1,000,000, ICU capacity breached, peak deaths over 100 per day.
+  - 800: peak daily cases around 100,000, ICU capacity breached, peak deaths over 100 per day.
 
 ## Disclaimer
 
@@ -116,11 +116,11 @@ So an outbreak seeded at 70% vaccination with 800 cases is worse than an outbrea
 
 To summarise, opening with 70% vaccination at 800 cases rather than 30 cases would lead to:
 
-- a roughly 5000-fold increase in peak daily cases;
+- a roughly 500-fold increase in peak daily cases;
 - ICU capacity being exceeded; and
 - hundreds of deaths per day.
 
-Now an argument could be made that the TTIQ system may operate optimally initially before breaking down as case numbers increase. A more sophisticated TTIQ model that allowed for changing effectiveness over time might yield less extreme results, but improving on the Doherty model is beyond the scope of this discussion. The point is: the 25-fold increase in daily case numbers due to increased initial outbreak size will compound with the 200-fold increase in reduced TTIQ effectiveness due to higher daily rates, and this massive increase in daily cases will have knock-on effects to ICU admissions and ultimately deaths (the fact it compounds so perfectly - i.e. 25 x 200 = 5000 - surprised even me).
+Now an argument could be made that the TTIQ system may operate optimally initially before breaking down as case numbers increase. A more sophisticated TTIQ model that allowed for changing effectiveness over time might yield less extreme results, but improving on the Doherty model is beyond the scope of this discussion. The point is: the 25-fold increase in daily case numbers due to increased initial outbreak size will compound with the 200-fold increase in reduced TTIQ effectiveness due to higher daily rates, and this massive increase in daily cases will have knock-on effects to ICU admissions and ultimately deaths. The compounding is not perfect - we only see a 500-fold increase in case numbers, rather than 25 x 200 = 5,000, but this is to be expected as the assumption that the number of cases is significantly lower than the number of daily vaccinations breaks down.
 
 ## Conclusions
 
