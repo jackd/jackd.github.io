@@ -35,15 +35,17 @@ $N = \left[(Q K^T) \circ L\right] V$
 
 where $Q$, $K$ and $V$ are the query, key and value matrices used in non-causal fast attention, $L$ is a lower triangular matrix with values of $1$ on and below the diagonal and $\circ$ is the _Hadamard product_ (elementwise product). Noting that $Q$ and $K$ are low-rank (that's the whole point of performers), we can use the following handy dandy property of Hadamard products ([Property 1](http://pi.math.cornell.edu/~ajt/presentations/HadamardProduct.pdf)):
 
-$\left[A \circ \sum_j u_j v_j^T\right]x = \sum_j D(u_j) A D(v_j) x$
+$\left[A \circ \sum_j \mathbf{u}_j \mathbf{v}_j^T\right]\mathbf{x} = \sum_j D(\mathbf{u}_j) A D(\mathbf{v}_j) \mathbf{x}$
 
-where $D(z)$ is the diagonal matrix with diagonal values $z$. This means we can express our fast causal attention output as
+where $D(\mathbf{z})$ is the diagonal matrix with diagonal values $\mathbf{z}$. This means we can express our fast causal attention output as
 
-$N = \sum_m D(q_m) L D(k_m) V.$
+$N = \sum_m D(\mathbf{q}_m) L D(\mathbf{k}_m) V.
 
-Note it is neither efficient nor necessary to compute any of the new matrices above. $D(k_m) Z$ is just the scaling of rows of $Z$ by $k_m$, while $L Z$ is the cumulative sum of $Z$ on the leading dimension. This results in a significantly simpler tensorflow implementation without the need to implement custom gradients or use python loops.
+where $\mathbf{q}_m$ and $\mathbf{k}_m$ are the $m^\text{th}$ columns of Q and K respectively.
 
-The implementation looks slighty different to the maths above because we compute $D(k_m) V$ simultaneously for all $m$ and then perform the sum over $m$ using `tf.linalg.matvec`.
+Note it is neither efficient nor necessary to compute any of the new matrices above. $D(\mathbf{k}_m) Z$ is just the scaling of rows of $Z$ by $\mathbf{k}_m$, while $L Z$ is the cumulative sum of $Z$ on the leading dimension. This results in a significantly simpler tensorflow implementation without the need to implement custom gradients or use python loops.
+
+The implementation looks slighty different to the maths above because we compute $D(\mathbf{k}_m) V$ simultaneously for all $m$ and then combine scaling and reduction over $m$ simultaneously using `tf.linalg.matvec`.
 
 ```python
 def causal_numerator(qs: tf.Tensor, ks: tf.Tensor, vs: tf.Tensor):
@@ -68,7 +70,7 @@ After removing comments and documentation, that's a 3-line implementation as opp
 
 ### Denominator
 
-The noncausal denominator function is conceptually the same as the numerator except using the ones vector for $V$. Since the first operation involves scaling $V$, we can skip this entirely and just use the keys $ks$:
+The noncausal denominator function is conceptually the same as the numerator except using the ones vector for $V$. Since the first operation involves scaling $V$, we can skip this entirely and just use the keys `ks`:
 
 ```python
 def causal_denominator(qs, ks):
@@ -140,4 +142,4 @@ Warmup time for v1_backward-gpu-jit: 0.12377095222473145
 
 ## Conclusion
 
-Research is messy. While it's tempting to think those at google are gods who are capable of understanding things much more complicated than ourselves, sometimes it's just a case of a poor understanding/overly complex implementation. In this case we've significantly simplified the implementation and drastically improved compilation time without affecting runtime performance. These changes are unlikely to change the world, but I feel they're worth doing nonetheless.
+Research is messy. While it's tempting to think those at google are gods who write things as simply as possible any resulting complexity is inherent to the problem, sometimes simplifications fall through the cracks. In this case we've significantly simplified the implementation and drastically improved compilation time without affecting runtime performance. These changes in isolation are unlikely to change the world, but if it makes reasoning about and extending these ideas easier I think they're well worth doing.
