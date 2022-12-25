@@ -6,9 +6,16 @@ categories: [Tensorflow, Machine Learning, Linear Algebra]
 tags: [performance, benchmarks]
 ---
 
-Comparing implementations of [fast causal attention](https://ai.googleblog.com/2020/10/rethinking-attention-with-performers.html).
+<script>
+window.MathJax = {
+    tex: {
+      tags: 'ams',
+      inlineMath: [['$', '$'], ['\\(', '\\)']]
+    }
+};
+</script>
 
-Having looked at google-research's [fast attention tensorflow implementation](https://github.com/google-research/google-research/blob/master/performer/fast_attention/tensorflow/fast_attention.py), I was left scratching my head about the causal attention implementation. This gist investigates a simpler implementation.
+Having looked at google-research's [fast attention tensorflow implementation](https://github.com/google-research/google-research/blob/master/performer/fast_attention/tensorflow/fast_attention.py) and corresponding [blog post](https://ai.googleblog.com/2020/10/rethinking-attention-with-performers.html), I was left scratching my head about the causal attention implementation. This post discusses a simpler implementation.
 
 ## TL;DR
 
