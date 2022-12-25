@@ -4,6 +4,7 @@ date: 2022-11-30 11:00:01 +1000
 image: https://1.bp.blogspot.com/-kJKZ5veuREk/X5IcGdqtbCI/AAAAAAAAGtM/PWmo0lHnhSUQ5nabOwhKIN9rh6pYxFItQCLcBGAsYHQ/s1238/image4.gif
 categories: [Tensorflow, Machine Learning, Linear Algebra]
 tags: [performance, benchmarks]
+math: true
 ---
 
 <script>
