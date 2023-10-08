@@ -16,7 +16,7 @@ window.MathJax = {
 };
 </script>
 
-[Retention networks](https://arxiv.org/abs/2307.08621) have been making waves in the large language model scene, with big claims about the potential to replace transformers with training parallelism, cheaper inference and good performance. I noticed some similarities with other work on [RWKV](./2023-10-01-improving-rwkv.md) and [fast attention](./2022-11-30-simple-fast-attention.md) and wanted to see if any of the ideas were transferable.
+[Retention networks](https://arxiv.org/abs/2307.08621) have been making waves in the large language model scene, with big claims about the potential to replace transformers with training parallelism, cheaper inference and good performance. I noticed some similarities with other work on [RWKV](https://jackd.github.io/posts/improving-rwkv/) and [fast attention](https://jackd.github.io/posts/simple-fast-attention/) and wanted to see if any of the ideas were transferable.
 
 ## TL;DR
 
@@ -223,7 +223,7 @@ What's much more interesting than the implementation however is the scaling of o
 
 So how do all these implementations go? Below is a plot of a single retention inference speed on a sequence of 2048 tokens. We fix the total number of channels across all heads to 512 and vary the number of heads from 1 to 256 in powers of 2 along the x-axis.
 
-![Retention implementation inference speeds](./../assets/img/posts/retnet/benchmark.png)
+![Retention implementation inference speeds](/assets/img/posts/retnet/benchmark.png)
 
 We note the following behaviour:
 
