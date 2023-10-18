@@ -5,9 +5,14 @@ order: 2
 
 ---
 
+## NLP
+
+- [keras-rwkv](https://github.com/jackd/keras-rwkv): [RWKV](https://wiki.rwkv.com/) implementation using keras / keras-nlp, with associative scan based implementation optimization.
+- [keras-retnet](https://github.com/jackd/keras-retnet): [Retention Network](https://arxiv.org/abs/2307.08621) implementation using keras / keras-nlp.
+
 ## JAX Projects
 
-- [huf](https://github.com/jackd/huf): [haiku](https://github.com/deepmind/dm-haiku) utilities and framework.
+<!-- - [huf](https://github.com/jackd/huf): [haiku](https://github.com/deepmind/dm-haiku) utilities and framework. -->
 - [spax](https://github.com/jackd/spax): Sparse operations and utilities.
 - [grax](https://github.com/jackd/grax): Graph neural network implementations.
 - [deqx](https://github.com/jackd/deqx): [Deep Equilibrium](https://arxiv.org/abs/1909.01377) operations and haiku modules.
@@ -15,11 +20,11 @@ order: 2
 ## Tensorfow Utilities
 
 - [tfbm](https://github.com/jackd/tfbm): High level decorator-based interface and CLI and tensorflow benchmarks.
-- [kblocks](https://github.com/jackd/kblocks): Keras blocks with dependency injection and an efficient, dynamically configurable CLI.
+<!-- - [kblocks](https://github.com/jackd/kblocks): Keras blocks with dependency injection and an efficient, dynamically configurable CLI. -->
 - [meta-model](https://github.com/jackd/meta-model): A framework for simultaneously building data map functions and learned models for model-dependent data preprocessing pipelines.
 - [tfrng](https://github.com/jackd/tfrng): Unified interface for different random number generation implementations and transforms for deterministic pipelines.
 - [tf_marching_cubes](https://github.com/jackd/tf_marching_cubes): peicewise-differentiable marching cubes implementations.
-- [tf_nearest_neighbour](https://github.com/jackd/tf_nearest_neighbour): brute-force kernels and `tf.py_func` hacks for KDTree implementations.
+<!-- - [tf_nearest_neighbour](https://github.com/jackd/tf_nearest_neighbour): brute-force kernels and `tf.py_func` hacks for KDTree implementations. -->
 - [sdf_renderer](https://github.com/jackd/sdf_renderer): differentiable signed distance function rendering  in tensorflow.
 
 ## Dataset Repositories
