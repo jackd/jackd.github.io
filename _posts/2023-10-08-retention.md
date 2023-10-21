@@ -141,10 +141,10 @@ def retention_chunkwise_recurrent(
 
 ## Reformulation with Parallel Associative Scan
 
-We said above that the recurrent implementation suffered from lack of parallelism due to its inherently sequential nature. This doesn't have to be the case, however. It turns out that the exponential moving average being computed can be represented as a cumulative sum using a special operator $\oplus$ that operates on $\left\{x, \gamma \right\}$ tuples,
+We said above that the recurrent implementation suffered from lack of parallelism due to its inherently sequential nature. This doesn't have to be the case, however. It turns out that the exponential moving average being computed can be represented as a cumulative sum using a special operator $\oplus$ that operates on $\{x, \gamma \}$ tuples,
 
 $$
-\left\{x_a, \gamma_a \right\} \oplus \left\{x_b, \gamma_b \right\} = \left\{\gamma_b x_a + x_b, \gamma_a \gamma_b \right\}.
+\{x_a, \gamma_a \} \oplus \{x_b, \gamma_b \} = \{\gamma_b x_a + x_b, \gamma_a \gamma_b \}.
 $$
 
 While it's not commutative like most "plus" operators, it is associative, which means its usable in _associative scan_ implementations. This is the thread that ties this to previous ideas I've played with in both fast attention and RWKV. A full overview of associative scan algorithms is beyond the scope of this post, but it should be enough to know that it is a well-studied problem in computer science and that efficient, parallelizable implementations exist. In particular, `jax` has `jax.lax.associative_scan`, making a cumulative exponential moving average function trivial to implement:
