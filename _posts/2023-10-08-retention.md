@@ -9,9 +9,12 @@ math: true
 
 <script>
 window.MathJax = {
+    loader: {load: ['[tex]/cases']},
     tex: {
-      tags: 'ams',
-      inlineMath: [['$', '$'], ['\\(', '\\)']]
+        tags: 'ams',
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        packages: {'[+]': ['cases']}
     }
 };
 </script>
@@ -28,18 +31,18 @@ window.MathJax = {
 
 The main contribution of retention networks is to replace the attention module from transformers with so-called _retention_,
 
-$
+$$
 \text{Retention}(Q, K, V) = \left(D \odot K Q^T\right) V,
-$
+$$
 
 where $\odot$ represents an elementwise product and $D$ is a lower-triangular matrix with values given by powers of a scalar $0 < \gamma < 1$,
 
-$
+$$
 D_{ij} =\begin{cases}
-      \gamma^{i-j} & i \ge j \\
-      0            & \text{otherwise}
-   \end{cases}.
-$
+      \gamma^{i-j} & i \ge j, \\
+      0            & \text{otherwise.}
+   \end{cases}
+$$
 
 wher $Q \in \mathbb{R}^{T \times d_k}$, $K \in \mathbb{R}^{T \times d_k}$ and $V \in \mathbb{R}^{T \times d_v}$ are key, query and value tensors with obvious analogies in standard attention, $T$ is the sequence length and $d_k$ and $d_v$ are the key and value dimension respectively. The authors also propose multi-scale retention analogous to multi-head attention where decay values $\gamma$ vary across heads.
 
@@ -55,13 +58,13 @@ The main downside of this method is that explicitly forming $KQ^T$ requires $\ma
 
 The recurrent implementation computes outputs sequentially, using
 
-$
+$$
 S_{n} = \gamma S_{n-1} + K_n^T V_n,
-$
+$$
 
-$
+$$
 \text{Retention}(Q, K, V)_n = Q_n S_n.
-$
+$$
 
 This removes the quadratic dependency on sequence length at the cost of parallelism, as the recurrence relationship must be iterate for each token sequentially.
 
@@ -140,9 +143,9 @@ def retention_chunkwise_recurrent(
 
 We said above that the recurrent implementation suffered from lack of parallelism due to its inherently sequential nature. This doesn't have to be the case, however. It turns out that the exponential moving average being computed can be represented as a cumulative sum using a special operator $\oplus$ that operates on $\left\{x, \gamma \right\}$ tuples,
 
-$
+$$
 \left\{x_a, \gamma_a \right\} \oplus \left\{x_b, \gamma_b \right\} = \left\{\gamma_b x_a + x_b, \gamma_a \gamma_b \right\}.
-$
+$$
 
 While it's not commutative like most "plus" operators, it is associative, which means its usable in _associative scan_ implementations. This is the thread that ties this to previous ideas I've played with in both fast attention and RWKV. A full overview of associative scan algorithms is beyond the scope of this post, but it should be enough to know that it is a well-studied problem in computer science and that efficient, parallelizable implementations exist. In particular, `jax` has `jax.lax.associative_scan`, making a cumulative exponential moving average function trivial to implement:
 
