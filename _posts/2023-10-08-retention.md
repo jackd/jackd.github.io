@@ -1,7 +1,7 @@
 ---
 title: "Retention LLMs: Analysing Algorithms and Alternative Implementations"
 date: 2023-10-01 11:00:01 +1000
-image: /assets/img/posts/omicron/retnet/stats.png
+image: /assets/img/posts/retnet/stats.png
 categories: [keras, LLM, jax]
 tags: [performance, benchmarks]
 math: true
