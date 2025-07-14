@@ -1,0 +1,463 @@
+<!DOCTYPE html><html lang="en" ><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><meta name="theme" content="Chirpy v2.6.2"><meta name="generator" content="Jekyll v4.4.1" /><meta property="og:title" content="Deterministic Tensorflow Part 1: Model Training" /><meta name="author" content="Dominic Jack" /><meta property="og:locale" content="en_US" /><meta name="description" content="Reproducibility is critical to any scientific endeavour, and machine learning is no exception. Releasing code that generates results from papers is an important step in addressing this, but difficulties arise in random aspect of neural network training including data shuffling, augmentation and network initialization, making exact replication of results difficult. Two common approaches for handling these difficulties are:" /><meta property="og:description" content="Reproducibility is critical to any scientific endeavour, and machine learning is no exception. Releasing code that generates results from papers is an important step in addressing this, but difficulties arise in random aspect of neural network training including data shuffling, augmentation and network initialization, making exact replication of results difficult. Two common approaches for handling these difficulties are:" /><link rel="canonical" href="https://jackd.github.io/posts/deterministic-tf-part-1/" /><meta property="og:url" content="https://jackd.github.io/posts/deterministic-tf-part-1/" /><meta property="og:site_name" content="jackd" /><meta property="og:image" content="https://jackd.github.io/assets/img/posts/pre-emptible-venn.jpg" /><meta property="og:type" content="article" /><meta property="article:published_time" content="2020-12-06T11:00:00+10:00" /><meta name="twitter:card" content="summary_large_image" /><meta property="twitter:image" content="https://jackd.github.io/assets/img/posts/pre-emptible-venn.jpg" /><meta property="twitter:title" content="Deterministic Tensorflow Part 1: Model Training" /><meta name="twitter:site" content="@dombombau" /><meta name="twitter:creator" content="@Dominic Jack" /><meta name="google-site-verification" content="google_meta_tag_verification" /> <script type="application/ld+json"> {"description":"Reproducibility is critical to any scientific endeavour, and machine learning is no exception. Releasing code that generates results from papers is an important step in addressing this, but difficulties arise in random aspect of neural network training including data shuffling, augmentation and network initialization, making exact replication of results difficult. Two common approaches for handling these difficulties are:","author":{"@type":"Person","name":"Dominic Jack"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://jackd.github.io/posts/deterministic-tf-part-1/"},"headline":"Deterministic Tensorflow Part 1: Model Training","dateModified":"2020-12-08T21:39:08+10:00","datePublished":"2020-12-06T11:00:00+10:00","url":"https://jackd.github.io/posts/deterministic-tf-part-1/","@type":"BlogPosting","image":"https://jackd.github.io/assets/img/posts/pre-emptible-venn.jpg","@context":"https://schema.org"}</script><title>Deterministic Tensorflow Part 1: Model Training | jackd</title><link rel="shortcut icon" href="/assets/img/favicons/favicon.ico" type="image/x-icon"><link rel="icon" href="/assets/img/favicons/favicon.ico" type="image/x-icon"><link rel="apple-touch-icon" href="/assets/img/favicons/apple-icon.png"><link rel="apple-touch-icon" href="/assets/img/favicons/apple-icon-precomposed.png"><link rel="apple-touch-icon" sizes="57x57" href="/assets/img/favicons/apple-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/assets/img/favicons/apple-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/assets/img/favicons/apple-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/assets/img/favicons/apple-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/assets/img/favicons/apple-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/assets/img/favicons/apple-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/assets/img/favicons/apple-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/assets/img/favicons/apple-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/assets/img/favicons/apple-icon-180x180.png"><link rel="icon" type="image/png" sizes="192x192" href="/assets/img/favicons/android-icon-192x192.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicons/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/assets/img/favicons/favicon-96x96.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/img/favicons/favicon-16x16.png"><link rel="manifest" href="/assets/img/favicons/manifest.json"><meta name='msapplication-config' content='/assets/img/favicons/browserconfig.xml'><meta name="msapplication-TileColor" content="#ffffff"><meta name="msapplication-TileImage" content="/assets/img/favicons/ms-icon-144x144.png"><meta name="theme-color" content="#ffffff"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"><link rel="dns-prefetch" href="https://fonts.gstatic.com"><link rel="preconnect" href="https://www.google-analytics.com" crossorigin="use-credentials"><link rel="dns-prefetch" href="https://www.google-analytics.com"><link rel="preconnect" href="https://www.googletagmanager.com" crossorigin="anonymous"><link rel="dns-prefetch" href="https://www.googletagmanager.com"><link rel="preconnect" href="cdn.jsdelivr.net"><link rel="dns-prefetch" href="cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha256-LA89z+k9fjgMKQ/kq4OO2Mrf8VltYml/VES+Rg0fh20=" crossorigin="anonymous"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.11.2/css/all.min.css" integrity="sha256-+N4/V/SbAFiW1MPBCXnfnP9QSN3+Keu+NlB+0ev/YKQ=" crossorigin="anonymous"><link rel="preload" href="/assets/css/post.css" as="style"><link rel="stylesheet" href="/assets/css/post.css"><link rel="preload" as="style" href="/assets/css/lib/bootstrap-toc.min.css"><link rel="stylesheet" href="/assets/css/lib/bootstrap-toc.min.css" /> <script src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script> <script async src="https://cdn.jsdelivr.net/combine/npm/popper.js@1.15.0,npm/bootstrap@4/dist/js/bootstrap.min.js"></script> <script async src="/assets/js/post.min.js"></script> <script defer src="/app.js"></script><body data-spy="scroll" data-target="#toc"><div id="sidebar" class="d-flex flex-column"><div id="nav-wrapper"><div id="profile-wrapper" class="d-flex flex-column"><div id="avatar" class="d-flex justify-content-center"> <a href="/" alt="avatar"> <img src="/assets/img/dom-cvpr.jpg" alt="avatar" onerror="this.style.display='none'"> </a></div><div class="profile-text mt-3"><div class="site-title"> <a href="/">jackd</a></div><div class="site-subtitle font-italic">Deep Learning Researcher</div></div></div><ul class="nav flex-column"><li class="nav-item d-flex justify-content-center "> <a href="/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-home ml-xl-3 mr-xl-3 unloaded"></i> <span>HOME</span> </a><li class="nav-item d-flex justify-content-center "> <a href="/tabs/papers/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-scroll ml-xl-3 mr-xl-3 unloaded"></i> <span>PAPERS</span> </a><li class="nav-item d-flex justify-content-center "> <a href="/tabs/projects/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-code ml-xl-3 mr-xl-3 unloaded"></i> <span>PROJECTS</span> </a><li class="nav-item d-flex justify-content-center "> <a href="/tabs/about/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-info ml-xl-3 mr-xl-3 unloaded"></i> <span>ABOUT</span> </a><li class="nav-item d-flex justify-content-center "> <a href="/tabs/categories/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-stream ml-xl-3 mr-xl-3 unloaded"></i> <span>CATEGORIES</span> </a><li class="nav-item d-flex justify-content-center "> <a href="/tabs/tags/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-tags ml-xl-3 mr-xl-3 unloaded"></i> <span>TAGS</span> </a><li class="nav-item d-flex justify-content-center "> <a href="/tabs/archives/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-archive ml-xl-3 mr-xl-3 unloaded"></i> <span>ARCHIVES</span> </a></ul></div><div class="sidebar-bottom d-flex flex-wrap justify-content-around mt-4"> <span id="mode-toggle-wrapper"> <i class="mode-toggle fas fa-adjust"></i> <script type="text/javascript"> class ModeToggle { static get MODE_KEY() { return "mode"; } static get DARK_MODE() { return "dark"; } static get LIGHT_MODE() { return "light"; } constructor() { if (this.mode != null) { if (this.mode == ModeToggle.DARK_MODE) { if (!this.isSysDarkPrefer) { this.setDark(); } } else { if (this.isSysDarkPrefer) { this.setLight(); } } } var self = this; /* always follow the system prefers */ this.sysDarkPrefers.addListener(function() { if (self.mode != null) { if (self.mode == ModeToggle.DARK_MODE) { if (!self.isSysDarkPrefer) { self.setDark(); } } else { if (self.isSysDarkPrefer) { self.setLight(); } } self.clearMode(); } }); } /* constructor() */ setDark() { $('html').attr(ModeToggle.MODE_KEY, ModeToggle.DARK_MODE); sessionStorage.setItem(ModeToggle.MODE_KEY, ModeToggle.DARK_MODE); } setLight() { $('html').attr(ModeToggle.MODE_KEY, ModeToggle.LIGHT_MODE); sessionStorage.setItem(ModeToggle.MODE_KEY, ModeToggle.LIGHT_MODE); } clearMode() { $('html').removeAttr(ModeToggle.MODE_KEY); sessionStorage.removeItem(ModeToggle.MODE_KEY); } get sysDarkPrefers() { return window.matchMedia("(prefers-color-scheme: dark)"); } get isSysDarkPrefer() { return this.sysDarkPrefers.matches; } get isDarkMode() { return this.mode == ModeToggle.DARK_MODE; } get isLightMode() { return this.mode == ModeToggle.LIGHT_MODE; } get hasMode() { return this.mode != null; } get mode() { return sessionStorage.getItem(ModeToggle.MODE_KEY); } flipMode() { if (this.hasMode) { if (this.isSysDarkPrefer) { if (this.isLightMode) { this.clearMode(); } else { this.setLight(); } } else { if (this.isDarkMode) { this.clearMode(); } else { this.setDark(); } } } else { if (this.isSysDarkPrefer) { this.setLight(); } else { this.setDark(); } } } /* flipMode() */ } /* ModeToggle */ let toggle = new ModeToggle(); $(".mode-toggle").click(function() { toggle.flipMode(); }); </script> </span> <span class="icon-border"></span> <a href="https://github.com/jackd" aria-label="github" target="_blank" rel="noopener"> <i class="fab fa-github-alt"></i> </a> <a href="https://twitter.com/dombombau" aria-label="twitter" target="_blank" rel="noopener"> <i class="fab fa-twitter"></i> </a> <a href=" javascript:location.href = 'mailto:' + ['thedomjack','gmail.com'].join('@')" aria-label="email" > <i class="fas fa-envelope"></i> </a> <a href="/feed.xml" aria-label="rss" > <i class="fas fa-rss"></i> </a></div></div><div id="topbar-wrapper" class="row justify-content-center topbar-down"><div id="topbar" class="col-11 d-flex h-100 align-items-center justify-content-between"> <span id="breadcrumb"> <span> <a href="/"> Posts </a> </span> <span>Deterministic Tensorflow Part 1: Model Training</span> </span> <i id="sidebar-trigger" class="fas fa-bars fa-fw"></i><div id="topbar-title"> Post</div><i id="search-trigger" class="fas fa-search fa-fw"></i> <span id="search-wrapper" class="align-items-center"> <i class="fas fa-search fa-fw"></i> <input class="form-control" id="search-input" type="search" aria-label="search" placeholder="Search..."> <i class="fa fa-times-circle fa-fw" id="search-cleaner"></i> </span> <span id="search-cancel" >Cancel</span></div></div><div id="main-wrapper"><div id="main"><div class="row"><div id="post-wrapper" class="col-12 col-lg-11 col-xl-8"><div class="post pl-1 pr-1 pl-sm-2 pr-sm-2 pl-md-4 pr-md-4"><h1 data-toc-skip>Deterministic Tensorflow Part 1: Model Training</h1><div class="post-meta text-muted d-flex flex-column"><div> Posted <span class="timeago " data-toggle="tooltip" data-placement="bottom" title="Sun, Dec 6, 2020, 11:00 AM +1000" > Dec 6, 2020 <i class="unloaded">2020-12-06T11:00:00+10:00</i> </span> by <span class="author"> Dominic Jack </span></div><div> Updated <span class="timeago lastmod" data-toggle="tooltip" data-placement="bottom" title="Tue, Dec 8, 2020, 9:39 PM +1000" > Dec 8, 2020 <i class="unloaded">2020-12-08T21:39:08+10:00</i> </span></div></div><div class="post-content"> <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7 " data-src="/assets/img/posts/pre-emptible-venn.jpg" class="post-preview-img"><p>Reproducibility is critical to any scientific endeavour, and machine learning is no exception. Releasing code that generates results from papers is an important step in addressing this, but difficulties arise in random aspect of neural network training including data shuffling, augmentation and network initialization, making exact replication of results difficult. Two common approaches for handling these difficulties are:</p><ol><li>repeating experiments multiple times and reporting statistics; and<li>managing the random state.</ol><p>This post looks at the second point, particularly as it applies to training <a href="https://tensorflow.org">tensorflow</a>’s <a href="https://www.tensorflow.org/api_docs/python/tf/keras/Model#fit">keras.Model</a>s. We’ll be focusing on two properties of our programs:</p><ul><li><em>Determinism</em>: our programs should produce exactly the same outputs for the same inputs.<li><em>Pre-emptibility</em>: our programs should be able to be interrupted and restarted without affecting the results.</ul><p>Note that just because our programs are deterministic doesn’t mean there aren’t sources of pseudo-randomness - just that those sources need to be configurable such that they can perform every time. This is commonly done by setting a program’s random seed, but as we’ll see that’s not necessarily the end of the story - particularly if we want our programs to be pre-emptible. For more information about setting random seeds and random number generation in tensorflow check out tensorflow’s <a href="https://www.tensorflow.org/guide/random_numbers">random numbers guide</a>.</p><p>This is part 1 of a 2-part series looking at deterministic, pre-emptible tensorflow. <a href="../deterministic-tf-part-2">Part 2</a> takes a deep dive into data augmentation.</p><h2 id="modules-checkpoints-and-backupandrestore">Modules, Checkpoints and BackupAndRestore</h2><p>Before we get into the specifics of training deterministic pre-emptible models, it’s important that we understand the mechanism by which we’ll be saving and restoring our training state. We’ll be using 2 key classes provided in tensorflow:</p><ul><li><a href="https://www.tensorflow.org/api_docs/python/tf/Module">tf.Module</a>: base class for objects that track dependencies, where dependencies are defined as savable objects assigned as attributes. Most public <code class="language-plaintext highlighter-rouge">tf.keras</code> classes including <code class="language-plaintext highlighter-rouge">Model</code> and <code class="language-plaintext highlighter-rouge">Layer</code> subclass this.<li><a href="https://www.tensorflow.org/api_docs/python/tf/train/Checkpoint">tf.train.Checkpoint</a>: for saving and restoring <code class="language-plaintext highlighter-rouge">Module</code>s, including any tracked dependencies.</ul><p>The following example shows simple usage.</p><div class="language-python highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+</pre><td class="rouge-code"><pre><span class="kn">import</span> <span class="n">tensorflow</span> <span class="k">as</span> <span class="n">tf</span>
+
+
+<span class="k">class</span> <span class="nc">Foo</span><span class="p">(</span><span class="n">tf</span><span class="p">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">bar</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nc">Variable</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="p">.</span><span class="n">int64</span><span class="p">)</span>
+
+
+<span class="n">foo</span> <span class="o">=</span> <span class="nc">Foo</span><span class="p">()</span>
+<span class="n">foo</span><span class="p">.</span><span class="n">bar</span><span class="p">.</span><span class="nf">assign</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">chkpt</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">train</span><span class="p">.</span><span class="nc">Checkpoint</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="n">foo</span><span class="p">)</span>
+<span class="n">chkpt</span><span class="p">.</span><span class="nf">write</span><span class="p">(</span><span class="sh">"</span><span class="s">/tmp/foo</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="k">del</span> <span class="n">foo</span><span class="p">,</span> <span class="n">chkpt</span>
+<span class="n">fresh_foo</span> <span class="o">=</span> <span class="nc">Foo</span><span class="p">()</span>
+<span class="n">fresh_chkpt</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">train</span><span class="p">.</span><span class="nc">Checkpoint</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="n">fresh_foo</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">fresh_foo</span><span class="p">.</span><span class="n">bar</span><span class="p">.</span><span class="nf">numpy</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span>
+<span class="n">fresh_chkpt</span><span class="p">.</span><span class="nf">read</span><span class="p">(</span><span class="sh">"</span><span class="s">/tmp/foo</span><span class="sh">"</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">fresh_foo</span><span class="p">.</span><span class="n">bar</span><span class="p">.</span><span class="nf">numpy</span><span class="p">()</span> <span class="o">==</span> <span class="mi">2</span>
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Completed successfully</span><span class="sh">"</span><span class="p">)</span>
+</pre></table></code></div></div><p>During training, our training state will be made up of:</p><ul><li>the <a href="https://www.tensorflow.org/api_docs/python/tf/keras/Model">Model</a>, including any trainable weights, the random state of any stochastic operations, and the <a href="https://www.tensorflow.org/api_docs/python/tf/keras/optimizers/Optimizer">Optimizer</a> if provided in <a href="https://www.tensorflow.org/api_docs/python/tf/keras/Model#compile">compile</a>;<li>the training data <a href="https://www.tensorflow.org/api_docs/python/tf/data/Iterator">Iterator</a>, including random state associated with any data augmentation or shuffle operations, or buffers for operations like <a href="https://www.tensorflow.org/api_docs/python/tf/data/Dataset#prefetch">prefetch</a>; and<li>any other stateful <a href="https://www.tensorflow.org/api_docs/python/tf/keras/callbacks/Callback">callbacks</a>, like <a href="https://www.tensorflow.org/api_docs/python/tf/keras/callbacks/ReduceLROnPlateau">ReduceLROnPlateau</a> or <a href="https://www.tensorflow.org/api_docs/python/tf/keras/callbacks/EarlyStopping">EarlyStopping</a>.</ul><p>For convenience, we’ll be using <a href="https://www.tensorflow.org/api_docs/python/tf/keras/callbacks/experimental/BackupAndRestore">BackupAndRestore</a> callback to manage when training state is saved or restored via a <code class="language-plaintext highlighter-rouge">Checkpoint</code>. Unfortunately, <code class="language-plaintext highlighter-rouge">BackupAndRestore</code> only stores the state of the <code class="language-plaintext highlighter-rouge">Model</code> - not the other aspects of our training state listed above. A simple work-around is to include the other elements in our <code class="language-plaintext highlighter-rouge">Model</code>’s training state. Since <code class="language-plaintext highlighter-rouge">Model</code>s are <code class="language-plaintext highlighter-rouge">Module</code>s, they automatically track dependencies assigned as attributes.</p><div class="language-python highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre><td class="rouge-code"><pre><span class="n">model</span><span class="p">.</span><span class="n">_train_iter</span> <span class="o">=</span> <span class="n">train_iter</span>
+<span class="n">model_callbacks</span> <span class="o">=</span> <span class="n">callbacks</span>
+<span class="c1"># now `model`'s state will include that state of `train_iter` and `callback`
+</span></pre></table></code></div></div><h2 id="random-seeds-and-weight-initialization">Random Seeds and Weight Initialization</h2><p>Probably the largest source of non-determinism - and the simplest to fix - is weight initialization. We can make this deterministic by calling <a href="https://www.tensorflow.org/api_docs/python/tf/random/set_seed">tf.random.set_seed</a>.</p><div class="language-python highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre><td class="rouge-code"><pre><span class="n">tf</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">set_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+</pre></table></code></div></div><p>Note this will only affect operations created <em>after</em> this call that use the global seed, including <a href="https://www.tensorflow.org/api_docs/python/tf/keras/layers">tf.keras.layers</a> weight initialization and <a href="https://www.tensorflow.org/api_docs/python/tf/data/Dataset#shuffle">Dataset.shuffle</a>. It will <em>not</em> affect the <a href="https://www.tensorflow.org/api_docs/python/tf/random/get_global_generator">global generator state</a>. If our program uses the global generator, we should also set it’s state.</p><div class="language-python highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre><td class="rouge-code"><pre><span class="n">tf</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">get_global_generator</span><span class="p">().</span><span class="nf">reset_from_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+</pre></table></code></div></div><p>Alternatively, we can replace the global generator with a fresh one.</p><div class="language-python highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre><td class="rouge-code"><pre><span class="n">tf</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">set_global_generator</span><span class="p">(</span><span class="n">tf</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="n">Generator</span><span class="p">.</span><span class="nf">from_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">))</span>
+</pre></table></code></div></div><p>The former will operations created by methods on the global generator, while the second will not (though may cause garbage collection related breakages if there are no refences to the old global generator). The result should be equivalent if called before any other <code class="language-plaintext highlighter-rouge">get_global_generator</code> calls.</p><h2 id="data-pipelining">Data Pipelining</h2><p>Most training data pipelines will have up to 3 sources of randomness:</p><ol><li>random operations involved in data augmentations like possible image rotations and/or flips;<li>race conditions associated with parallel map functions for data loading and augmentation; and<li>dataset shuffling.</ol><p>While researching this post I realized incorporating the first two in a deterministic and pre-emptible manner with tensorflow is distinctly non-trivial. To keep things simple I refactored that section into an entirely <a href="../deterministic-tf-part-2">separate article</a>.</p><p>In this post, we’ll use a relatively straight-forward pipeline without augmentation that uses a <code class="language-plaintext highlighter-rouge">shuffle</code> and uniform <code class="language-plaintext highlighter-rouge">map</code> function using the <a href="https://www.tensorflow.org/api_docs/python/tf/data/Dataset">tf.data.Dataset</a> interface. While <code class="language-plaintext highlighter-rouge">Dataset</code>s can be saved in checkpoints, they won’t contain all the state we want - in our instance, the shuffle buffer. Instead, we want to work with the <a href="https://www.tensorflow.org/api_docs/python/tf/data/Iterator">Iterator</a> of an infinite dataset.</p><div class="language-python highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+</pre><td class="rouge-code"><pre><span class="n">dataset</span><span class="p">:</span> <span class="n">tf</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="n">Dataset</span> <span class="o">=</span> <span class="nf">load_dataset</span><span class="p">(</span><span class="n">split</span><span class="o">=</span><span class="sh">'</span><span class="s">train</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">examples_per_epoch</span> <span class="o">=</span> <span class="nf">len</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">.</span><span class="nf">repeat</span><span class="p">()</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">.</span><span class="nf">shuffle</span><span class="p">(</span><span class="n">shuffle_buffer</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">.</span><span class="nf">batch</span><span class="p">(</span><span class="n">batch_size</span><span class="p">)</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span>
+    <span class="n">map_func</span><span class="p">,</span>
+    <span class="n">num_parallel_calls</span><span class="o">=</span><span class="n">tf</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="n">experimental</span><span class="p">.</span><span class="n">AUTOTUNE</span><span class="p">,</span>
+    <span class="n">deterministic</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>  <span class="c1"># not strictly necessary - this will be the default behaviour
+</span><span class="p">)</span>
+<span class="n">steps_per_epoch</span> <span class="o">=</span> <span class="n">examples_per_epoch</span> <span class="o">//</span> <span class="n">batch_size</span>  <span class="c1"># ignore final fractional batch
+</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">.</span><span class="nf">prefetch</span><span class="p">(</span><span class="n">tf</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="n">experimental</span><span class="p">.</span><span class="n">AUTOTUNE</span><span class="p">)</span>
+<span class="n">train_iter</span> <span class="o">=</span> <span class="nf">iter</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>  <span class="c1"># this can be saved in checkpoints to track buffer state
+</span></pre></table></code></div></div><p>Note that we apply <code class="language-plaintext highlighter-rouge">repeat</code> <em>before</em> <code class="language-plaintext highlighter-rouge">shuffle</code>. This has the following consequences:</p><ul><li>we have one persistent shuffle buffer, meaning we won’t need to refill it from scratch each epoch;<li>examples will bleed from one epoch to the next - i.e. every epoch will have slightly different examples; and<li>our dataset has infinite length.</ul><h2 id="floating-point-determinism">Floating Point Determinism</h2><p>There was a time when GPU operations were mostly non-deterministic due to race conditions in floating point operations. This is still the default case for many operations, but most can now be made deterministic by setting the <code class="language-plaintext highlighter-rouge">TF_DETERMINISTIC_OPS</code> environment variable.</p><div class="language-bash highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre><td class="rouge-code"><pre><span class="nb">export </span><span class="nv">TF_DETERMINISTIC_OPS</span><span class="o">=</span>1
+</pre></table></code></div></div><p>Alternatively, we can set it inside python.</p><div class="language-python highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre><td class="rouge-code"><pre><span class="kn">import</span> <span class="n">os</span>
+<span class="n">os</span><span class="p">.</span><span class="n">environ</span><span class="p">[</span><span class="sh">"</span><span class="s">TF_DETERMINISTIC_OPS</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="sh">"</span><span class="s">1</span><span class="sh">"</span>
+</pre></table></code></div></div><p>See nvidia’s <a href="https://github.com/NVIDIA/framework-determinism">determinism repository</a> for full details. Note there is not universal coverage for deterministic implementations - exceptions include <code class="language-plaintext highlighter-rouge">tf.gather</code> gradients, <code class="language-plaintext highlighter-rouge">tf.math.segment_*</code> operations and sparse-dense matrix multiplications (though the repository discusses ongoing work to resolve these).</p><h2 id="operations-with-random-state">Operations with Random State</h2><p>Some operations like <a href="https://www.tensorflow.org/api_docs/python/tf/keras/layers/Dropout">Dropout</a> are intended to be stochastic. Unfortunately, despite the <a href="https://www.tensorflow.org/guide/random_numbers">official guide for random number generation</a> discouraging their use, most implementations in tensorflow use base <code class="language-plaintext highlighter-rouge">tf.random</code> operations, rather than <code class="language-plaintext highlighter-rouge">tf.random.stateless_*</code> variants or <a href="https://www.tensorflow.org/api_docs/python/tf/random/Generator">Generator</a> methods. Hopefully this will change in subsequent releases, but for the moment we can re-implement those necessary for our networks. A simple dropout implementation is given below.</p><div class="language-python highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+</pre><td class="rouge-code"><pre><span class="c1"># We register it so we don't serialize then deserialize a `tf.keras.layers.Dropout`
+</span><span class="nd">@tf.keras.utils.register_keras_serializable</span><span class="p">(</span><span class="sh">"</span><span class="s">PreEmptible</span><span class="sh">"</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">Dropout</span><span class="p">(</span><span class="n">tf</span><span class="p">.</span><span class="n">keras</span><span class="p">.</span><span class="n">layers</span><span class="p">.</span><span class="n">Layer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">rate</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nf">super</span><span class="p">().</span><span class="nf">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">_rate</span> <span class="o">=</span> <span class="n">rate</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">_seed</span> <span class="o">=</span> <span class="n">seed</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">_rng</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">get_config</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="nf">super</span><span class="p">().</span><span class="nf">get_config</span><span class="p">()</span>
+        <span class="n">config</span><span class="p">.</span><span class="nf">update</span><span class="p">(</span><span class="nf">dict</span><span class="p">(</span><span class="n">rate</span><span class="o">=</span><span class="n">self</span><span class="p">.</span><span class="n">rate</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">self</span><span class="p">.</span><span class="n">seed</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">config</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">rate</span><span class="p">(</span><span class="n">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="n">_rate</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">seed</span><span class="p">(</span><span class="n">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="n">_seed</span>
+
+    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">input_shape</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">built</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">assert</span> <span class="n">self</span><span class="p">.</span><span class="n">_rng</span> <span class="ow">is</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">seed</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">_rng</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">get_global_generator</span><span class="p">().</span><span class="nf">split</span><span class="p">(</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">_rng</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="n">Generator</span><span class="p">.</span><span class="nf">from_seed</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">seed</span><span class="p">)</span>
+        <span class="nf">super</span><span class="p">().</span><span class="nf">build</span><span class="p">(</span><span class="n">input_shape</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_apply_training</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">_rng</span><span class="p">.</span><span class="nf">uniform</span><span class="p">(</span><span class="n">tf</span><span class="p">.</span><span class="nf">shape</span><span class="p">(</span><span class="n">inputs</span><span class="p">))</span> <span class="o">&gt;</span> <span class="n">self</span><span class="p">.</span><span class="n">rate</span>
+        <span class="k">return</span> <span class="n">tf</span><span class="p">.</span><span class="nf">where</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">inputs</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">self</span><span class="p">.</span><span class="n">rate</span><span class="p">),</span> <span class="n">tf</span><span class="p">.</span><span class="nf">zeros_like</span><span class="p">(</span><span class="n">inputs</span><span class="p">))</span>
+
+    <span class="nd">@tf.function</span>
+    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span>  <span class="c1"># pylint: disable=arguments-differ
+</span>        <span class="n">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">training</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="p">):</span>
+        <span class="k">assert</span> <span class="n">self</span><span class="p">.</span><span class="n">_rng</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="n">training</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">training</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">keras</span><span class="p">.</span><span class="n">backend</span><span class="p">.</span><span class="nf">learning_phase</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">training</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="nf">_apply_training</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">tf</span><span class="p">.</span><span class="nf">identity</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+</pre></table></code></div></div><p>Because both <code class="language-plaintext highlighter-rouge">Layer</code>s and <code class="language-plaintext highlighter-rouge">Generator</code>s are <code class="language-plaintext highlighter-rouge">Module</code>s, by assigning our <code class="language-plaintext highlighter-rouge">Generator</code> as an attribute of our <code class="language-plaintext highlighter-rouge">Layer</code>, the <code class="language-plaintext highlighter-rouge">Generator</code> state will be saved anywhere our <code class="language-plaintext highlighter-rouge">Layer</code> is, including when it’s part of a <code class="language-plaintext highlighter-rouge">Model</code>.</p><h2 id="callbacks">Callbacks</h2><p><a href="https://www.tensorflow.org/api_docs/python/tf/keras/callbacks/Callback">Callback</a>s provide a flexible interface for users to inject custom behaviour into a training loop (e.g. <code class="language-plaintext highlighter-rouge">Model.fit</code>). Most implementations in <code class="language-plaintext highlighter-rouge">tf.keras.callbacks</code> are responsible for logging, saving, or otherwise providing user feedback on the training process. However, a couple directly influence the training process and maintain their own state based on performance across multiple epochs: <a href="https://www.tensorflow.org/api_docs/python/tf/keras/callbacks/ReduceLROnPlateau">ReduceLROnPlateau</a> and <a href="https://www.tensorflow.org/api_docs/python/tf/keras/callbacks/EarlyStopping">EarlyStopping</a>.</p><p>There are three things we need to do to ensure their state is included with our model’s state:</p><ul><li>implement wrappers that extend <code class="language-plaintext highlighter-rouge">Module</code>;<li>change stateful attributes to non-trainable<a href="https://www.tensorflow.org/api_docs/python/tf/Variable">Variable</a>s rather than python primitives; and<li>assign them as attributes to the <code class="language-plaintext highlighter-rouge">Model</code>.</ul><p>In the following example, we demonstrate how we can wrap <code class="language-plaintext highlighter-rouge">ReduceLROnPlateau</code> such that it can be used in a pre-emptible training process.</p><div class="language-python highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+</pre><td class="rouge-code"><pre><span class="k">def</span> <span class="nf">variable_property</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dtype</span><span class="p">:</span> <span class="n">tf</span><span class="p">.</span><span class="n">DType</span><span class="p">,</span> <span class="n">doc</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">
+    Get a property that wraps `tf.Variable` assignment.
+
+    Useful for augmenting a base class to save values in `tf.Variable`s rather than
+    as attributes.
+    </span><span class="sh">"""</span>
+    <span class="n">attr_name</span> <span class="o">=</span> <span class="sa">f</span><span class="sh">"</span><span class="s">_variable_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="sh">"</span>
+
+    <span class="k">def</span> <span class="nf">getx</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">tf</span><span class="p">.</span><span class="n">keras</span><span class="p">.</span><span class="n">backend</span><span class="p">.</span><span class="nf">get_value</span><span class="p">(</span><span class="nf">getattr</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">))</span>
+
+    <span class="nd">@tf.Module.with_name_scope</span>
+    <span class="k">def</span> <span class="nf">setx</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">variable</span> <span class="o">=</span> <span class="nf">getattr</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">variable</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">variable</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nc">Variable</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="nf">setattr</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">,</span> <span class="n">variable</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">variable</span><span class="p">.</span><span class="nf">assign</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">delx</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="nf">delattr</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="nf">property</span><span class="p">(</span><span class="n">getx</span><span class="p">,</span> <span class="n">setx</span><span class="p">,</span> <span class="n">delx</span><span class="p">,</span> <span class="n">doc</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">CallbackModule</span><span class="p">(</span><span class="n">tf</span><span class="p">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">set_model</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">tf</span><span class="p">.</span><span class="n">keras</span><span class="p">.</span><span class="n">Model</span><span class="p">):</span>
+        <span class="c1"># pylint: disable=protected-access
+</span>        <span class="n">old_model</span> <span class="o">=</span> <span class="nf">getattr</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="sh">"</span><span class="s">model</span><span class="sh">"</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">old_model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">old_model</span><span class="p">.</span><span class="n">_callbacks</span><span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nf">hasattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="sh">"</span><span class="s">_callbacks</span><span class="sh">"</span><span class="p">):</span>
+            <span class="n">model</span><span class="p">.</span><span class="n">_callbacks</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="n">callbacks</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">_callbacks</span>
+        <span class="c1"># pylint: enable=protected-access
+</span>        <span class="k">assert</span> <span class="n">self</span><span class="p">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">callbacks</span>
+        <span class="n">callbacks</span><span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">self</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>  <span class="c1"># pylint: disable=attribute-defined-outside-init
+</span>
+
+<span class="k">class</span> <span class="nc">ReduceLROnPlateau</span><span class="p">(</span><span class="n">base</span><span class="p">.</span><span class="n">ReduceLROnPlateau</span><span class="p">,</span> <span class="n">CallbackModule</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">CallbackModule</span><span class="p">.</span><span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">_supports_tf_logs</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">_config</span> <span class="o">=</span> <span class="nf">dict</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">base</span><span class="p">.</span><span class="n">ReduceLROnPlateau</span><span class="p">.</span><span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="o">**</span><span class="n">self</span><span class="p">.</span><span class="n">_config</span><span class="p">)</span>
+
+    <span class="n">best</span> <span class="o">=</span> <span class="nf">variable_property</span><span class="p">(</span><span class="sh">"</span><span class="s">best</span><span class="sh">"</span><span class="p">,</span> <span class="n">tf</span><span class="p">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">trainable</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="n">wait</span> <span class="o">=</span> <span class="nf">variable_property</span><span class="p">(</span><span class="sh">"</span><span class="s">wait</span><span class="sh">"</span><span class="p">,</span> <span class="n">tf</span><span class="p">.</span><span class="n">int64</span><span class="p">,</span> <span class="n">trainable</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="n">cooldown_counter</span> <span class="o">=</span> <span class="nf">variable_property</span><span class="p">(</span><span class="sh">"</span><span class="s">cooldown_counter</span><span class="sh">"</span><span class="p">,</span> <span class="n">tf</span><span class="p">.</span><span class="n">int64</span><span class="p">,</span> <span class="n">trainable</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+</pre></table></code></div></div><h2 id="custom-fit">Custom Fit</h2><p>While the intent of this post was to create an implementation that used everyone’s favourite <a href="https://www.tensorflow.org/api_docs/python/tf/keras/Model#fit">Model.fit</a>, I wasn’t able to find a way. I suspect the issue is related to how keras iterates over the data, but there also seems to be some issues with the optimizer as well (deterministic results are acheivable with <code class="language-plaintext highlighter-rouge">Model.fit</code> if using <code class="language-plaintext highlighter-rouge">SGD</code> optimizer and without a <code class="language-plaintext highlighter-rouge">shuffle</code> transform in the data pipeline). Having said that, writing a custom <code class="language-plaintext highlighter-rouge">fit</code> implementation with the same interface isn’t too onerous.</p><div class="language-python highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+</pre><td class="rouge-code"><pre><span class="k">def</span> <span class="nf">as_infinite_iterator</span><span class="p">(</span>
+    <span class="n">dataset</span><span class="p">:</span> <span class="n">tf</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">steps_per_epoch</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">tf</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="n">Iterator</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+    <span class="sh">"""</span><span class="s">
+    Get an iterator for an infinite dataset and steps_per_epoch.
+
+    Args:
+        dataset: possibly infinite dataset.
+        steps_per_epoch: number of steps per epoch if `dataset` has infinite
+            cardinality, otherwise `None` or `dataset`</span><span class="sh">'</span><span class="s">s cardinality.
+
+    Returns:
+        iterator: tf.data.Iterator of possibly repeated `dataset`.
+        steps_per_epoch: number of elements in iterator considered one epoch.
+
+    Raises:
+        ValueError is dataset has finite cardinality inconsistent with steps_per_epoch.
+    </span><span class="sh">"""</span>
+    <span class="n">cardinality</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">keras</span><span class="p">.</span><span class="n">backend</span><span class="p">.</span><span class="nf">get_value</span><span class="p">(</span><span class="n">dataset</span><span class="p">.</span><span class="nf">cardinality</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">steps_per_epoch</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">steps_per_epoch</span> <span class="o">=</span> <span class="n">cardinality</span>
+        <span class="k">if</span> <span class="n">cardinality</span> <span class="o">==</span> <span class="n">tf</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="n">INFINITE_CARDINALITY</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="nc">ValueError</span><span class="p">(</span>
+                <span class="sh">"</span><span class="s">steps_per_epoch must be provided if dataset has infinite </span><span class="sh">"</span>
+                <span class="sh">"</span><span class="s">cardinality</span><span class="sh">"</span>
+            <span class="p">)</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">.</span><span class="nf">repeat</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">cardinality</span> <span class="o">!=</span> <span class="n">tf</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="n">INFINITE_CARDINALITY</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">cardinality</span> <span class="o">==</span> <span class="n">steps_per_epoch</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">.</span><span class="nf">repeat</span><span class="p">()</span>
+    <span class="k">return</span> <span class="nf">iter</span><span class="p">(</span><span class="n">dataset</span><span class="p">),</span> <span class="n">steps_per_epoch</span>
+
+
+<span class="k">def</span> <span class="nf">fit_custom</span><span class="p">(</span>
+    <span class="n">model</span><span class="p">:</span> <span class="n">tf</span><span class="p">.</span><span class="n">keras</span><span class="p">.</span><span class="n">Model</span><span class="p">,</span>
+    <span class="n">x</span><span class="p">:</span> <span class="n">tf</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="n">Dataset</span><span class="p">,</span>
+    <span class="n">epochs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">initial_epoch</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">validation_freq</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">validation_data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">tf</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="n">Dataset</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="n">steps_per_epoch</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="n">validation_steps</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="n">callbacks</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">tf</span><span class="p">.</span><span class="n">keras</span><span class="p">.</span><span class="n">callbacks</span><span class="p">.</span><span class="n">Callback</span><span class="p">]</span><span class="o">=</span><span class="p">(),</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="p">.</span><span class="n">keras</span><span class="p">.</span><span class="n">callbacks</span><span class="p">.</span><span class="n">History</span><span class="p">:</span>
+    <span class="sh">"""</span><span class="s">Custom fit implementation. See `tf.keras.Model.fit` for more info.</span><span class="sh">"""</span>
+    <span class="n">train_func</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="nf">make_train_function</span><span class="p">()</span>
+    <span class="n">train_iter</span><span class="p">,</span> <span class="n">steps_per_epoch</span> <span class="o">=</span> <span class="nf">as_infinite_iterator</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">steps_per_epoch</span><span class="p">)</span>
+    <span class="n">model</span><span class="p">.</span><span class="n">_train_iter</span> <span class="o">=</span> <span class="n">train_iter</span>
+
+    <span class="n">cb</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">keras</span><span class="p">.</span><span class="n">callbacks</span><span class="p">.</span><span class="nc">CallbackList</span><span class="p">(</span>
+        <span class="n">callbacks</span><span class="o">=</span><span class="n">callbacks</span><span class="p">,</span> <span class="n">add_history</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">add_progbar</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span>
+    <span class="p">)</span>
+    <span class="n">cb</span><span class="p">.</span><span class="nf">set_params</span><span class="p">(</span><span class="nf">dict</span><span class="p">(</span><span class="n">epochs</span><span class="o">=</span><span class="n">epochs</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="nf">int</span><span class="p">(</span><span class="n">verbose</span><span class="p">),</span> <span class="n">steps</span><span class="o">=</span><span class="n">steps_per_epoch</span><span class="p">))</span>
+
+    <span class="n">cb</span><span class="p">.</span><span class="nf">on_train_begin</span><span class="p">()</span>
+
+    <span class="n">initial_epoch</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="nf">_maybe_load_initial_epoch_from_ckpt</span><span class="p">(</span><span class="n">initial_epoch</span><span class="p">)</span>
+
+    <span class="n">model</span><span class="p">.</span><span class="n">stop_training</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">initial_epoch</span><span class="p">,</span> <span class="n">epochs</span><span class="p">):</span>
+        <span class="n">model</span><span class="p">.</span><span class="nf">reset_metrics</span><span class="p">()</span>
+        <span class="n">cb</span><span class="p">.</span><span class="nf">on_epoch_begin</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span>
+
+        <span class="n">logs</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">steps_per_epoch</span><span class="p">):</span>
+            <span class="n">cb</span><span class="p">.</span><span class="nf">on_train_batch_begin</span><span class="p">(</span><span class="n">step</span><span class="p">)</span>
+            <span class="n">logs</span> <span class="o">=</span> <span class="nf">train_func</span><span class="p">(</span><span class="n">train_iter</span><span class="p">)</span>
+            <span class="n">cb</span><span class="p">.</span><span class="nf">on_train_batch_end</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">logs</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">model</span><span class="p">.</span><span class="n">stop_training</span><span class="p">:</span>
+                <span class="k">break</span>
+        <span class="k">assert</span> <span class="n">logs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span>
+        <span class="n">epoch_logs</span> <span class="o">=</span> <span class="n">logs</span>
+        <span class="k">if</span> <span class="n">validation_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">model</span><span class="p">.</span><span class="nf">_should_eval</span><span class="p">(</span><span class="n">epoch</span><span class="p">,</span> <span class="n">validation_freq</span><span class="p">):</span>
+            <span class="n">logs</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="nf">evaluate</span><span class="p">(</span>
+                <span class="n">validation_data</span><span class="p">,</span>
+                <span class="n">steps</span><span class="o">=</span><span class="n">validation_steps</span><span class="p">,</span>
+                <span class="n">callbacks</span><span class="o">=</span><span class="n">callbacks</span><span class="p">,</span>
+                <span class="n">return_dict</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">epoch_logs</span><span class="p">.</span><span class="nf">update</span><span class="p">({</span><span class="sh">"</span><span class="s">val_</span><span class="sh">"</span> <span class="o">+</span> <span class="n">name</span><span class="p">:</span> <span class="n">val</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">logs</span><span class="p">.</span><span class="nf">items</span><span class="p">()})</span>
+        <span class="n">cb</span><span class="p">.</span><span class="nf">on_epoch_end</span><span class="p">(</span><span class="n">epoch</span><span class="p">,</span> <span class="n">epoch_logs</span><span class="p">)</span>
+        <span class="n">training_logs</span> <span class="o">=</span> <span class="n">epoch_logs</span>
+        <span class="k">if</span> <span class="n">model</span><span class="p">.</span><span class="n">stop_training</span><span class="p">:</span>
+            <span class="k">break</span>
+    <span class="n">cb</span><span class="p">.</span><span class="nf">on_train_end</span><span class="p">(</span><span class="n">logs</span><span class="o">=</span><span class="n">training_logs</span><span class="p">)</span>
+    <span class="k">del</span> <span class="n">model</span><span class="p">.</span><span class="n">_train_iter</span>
+    <span class="k">return</span> <span class="n">model</span><span class="p">.</span><span class="n">history</span>
+
+</pre></table></code></div></div><h2 id="complete-example">Complete Example</h2><p>The above functionality is all implemented in my <a href="https://github.com/jackd/kblocks.git">kblocks</a> repository. You can see a complete example (including data augmentation) <a href="https://github.com/tensorflow/tensorflow/jackd/kblocks/examples/fit.py">here</a>.</p><h2 id="conclusion">Conclusion</h2><p>As we’ve seen, there’s a lot more to deterministic and pre-emptible training than just setting the random seed and adding a <a href="https://www.tensorflow.org/api_docs/python/tf/keras/callbacks/experimental/BackupAndRestore">BackupAndRestore</a>.</p><p><em>Think I’m wrong? Found a typo or bug? Have a question or just think something needs further explanation? Let me know in the comments.</em></p></div><div class="post-tail-wrapper text-muted"><div class="post-meta mb-3"> <i class="far fa-folder-open fa-fw mr-1"></i> <a href='/categories/tensorflow/'>Tensorflow</a>, <a href='/categories/data/'>Data</a></div><div class="post-tags"> <i class="fa fa-tags fa-fw mr-1"></i> <a href="/tags/pipeline/" class="post-tag no-text-decoration" >pipeline</a> <a href="/tags/performance/" class="post-tag no-text-decoration" >performance</a> <a href="/tags/parallel/" class="post-tag no-text-decoration" >parallel</a> <a href="/tags/deterministic/" class="post-tag no-text-decoration" >deterministic</a> <a href="/tags/pre-emptible/" class="post-tag no-text-decoration" >pre-emptible</a></div><div class="post-tail-bottom d-flex justify-content-between align-items-center mt-3 pt-5 pb-2"><div class="license-wrapper"> This post is licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> by the author.</div><div class="share-wrapper"> <span class="share-label text-muted mr-1">Share</span> <span class="share-icons"> <a href="https://twitter.com/intent/tweet?text=Deterministic Tensorflow Part 1: Model Training - jackd&url=https://jackd.github.io/posts/deterministic-tf-part-1/" data-toggle="tooltip" data-placement="top" title="Twitter" target="_blank" rel="noopener" aria-label="Twitter"> <i class="fa-fw fab fa-twitter"></i> </a> <a href="https://www.facebook.com/sharer/sharer.php?title=Deterministic Tensorflow Part 1: Model Training - jackd&u=https://jackd.github.io/posts/deterministic-tf-part-1/" data-toggle="tooltip" data-placement="top" title="Facebook" target="_blank" rel="noopener" aria-label="Facebook"> <i class="fa-fw fab fa-facebook-square"></i> </a> <a href="https://telegram.me/share?text=Deterministic Tensorflow Part 1: Model Training - jackd&url=https://jackd.github.io/posts/deterministic-tf-part-1/" data-toggle="tooltip" data-placement="top" title="Telegram" target="_blank" rel="noopener" aria-label="Telegram"> <i class="fa-fw fab fa-telegram"></i> </a> <i class="fa-fw fas fa-link small" onclick="copyLink()" data-toggle="tooltip" data-placement="top" title="Copy link"></i> </span></div></div></div></div></div><div id="panel-wrapper" class="col-xl-3 pl-2 text-muted topbar-down"><div class="access"><div id="access-lastmod" class="post"> <span>Recent Update</span><ul class="post-content pl-0 pb-1 ml-1 mt-2"><li><a href="/posts/mpt/">Negative Gearing and the CGT Discount: A Modern Portfolio Theory Analysis</a><li><a href="/posts/retention/">Retention LLMs: Analysing Algorithms and Alternative Implementations</a><li><a href="/posts/simple-fast-attention/">Simple Fast Attention: Causal Implementation Experiments</a><li><a href="/posts/doherty-init/">Digging into Doherty: Implications of Initialization</a><li><a href="/posts/generalized-eig-jvp/">Generalized Eigenvalue Problem Derivatives</a></ul></div><div id="access-tags"> <span>Trending Tags</span><div class="d-flex flex-wrap mt-3 mb-1 mr-3"> <a class="post-tag" href="/tags/performance/">performance</a> <a class="post-tag" href="/tags/benchmarks/">benchmarks</a> <a class="post-tag" href="/tags/autograd/">autograd</a> <a class="post-tag" href="/tags/covid/">covid</a> <a class="post-tag" href="/tags/deterministic/">deterministic</a> <a class="post-tag" href="/tags/epidemiology/">epidemiology</a> <a class="post-tag" href="/tags/jax/">jax</a> <a class="post-tag" href="/tags/pre-emptible/">pre emptible</a> <a class="post-tag" href="/tags/finance/">finance</a> <a class="post-tag" href="/tags/parallel/">parallel</a></div></div></div><div id="toc-wrapper" class="pl-0 pr-4 mb-5"> <span class="pl-3 pt-2 mb-2">Contents</span><nav id="toc" data-toggle="toc"></nav></div></div></div><div class="row"><div class="col-12 col-lg-11 col-xl-8"><div id="post-extend-wrapper" class="pl-1 pr-1 pl-sm-2 pr-sm-2 pl-md-4 pr-md-4"><div id="related-posts" class="mt-5 mb-2 mb-sm-4"><h3 class="pt-2 mt-1 mb-4 ml-1" data-toc-skip>Further Reading</h3><div class="card-deck mb-4"><div class="card"> <a href="/posts/deterministic-tf-part-2/"><div class="card-body"> <span class="timeago small" > Dec 6, 2020 <i class="unloaded">2020-12-06T11:00:01+10:00</i> </span><h3 class="pt-0 mt-1 mb-3" data-toc-skip>Deterministic Tensorflow Part 2: Data Augmentation</h3><div class="text-muted small"><p> Data augmentation is commonly used to artificially inflate the size of training datasets and teach networks invariances to various transformations. For example, image classification networks often ...</p></div></div></a></div><div class="card"> <a href="/posts/retention/"><div class="card-body"> <span class="timeago small" > Oct 1, 2023 <i class="unloaded">2023-10-01T11:00:01+10:00</i> </span><h3 class="pt-0 mt-1 mb-3" data-toc-skip>Retention LLMs: Analysing Algorithms and Alternative Implementations</h3><div class="text-muted small"><p> Retention networks have been making waves in the large language model scene, with big claims about the potential to replace transformers with training parallelism, cheaper inference and good perf...</p></div></div></a></div><div class="card"> <a href="/posts/micro-benchmarks-tf2/"><div class="card-body"> <span class="timeago small" > Jan 23, 2021 <i class="unloaded">2021-01-23T11:00:01+10:00</i> </span><h3 class="pt-0 mt-1 mb-3" data-toc-skip>Micro-benchmarking in TF2</h3><div class="text-muted small"><p> TL;DR: TF2 Benchmarks don’t have to be hard to write. See example at the bottom and/or tfbm. “Premature optimization is the root of all evil.” – Donald Knuth This quote is ubiquitous in softw...</p></div></div></a></div></div></div><div class="post-navigation d-flex justify-content-between"> <span class="btn btn-outline-primary disabled"><p>-</p></span> <a href="/posts/deterministic-tf-part-2/" class="btn btn-outline-primary"><p>Deterministic Tensorflow Part 2: Data Augmentation</p></a></div><div id="disqus" class="pt-2 pb-2"><p class="font-italic text-center text-muted small"> Comments powered by <a href="https://disqus.com/">Disqus</a>.</p></div><script src="/assets/js/lib/jquery.disqusloader.min.js"></script> <script> var options = { scriptUrl: '//jackd.disqus.com/embed.js', disqusConfig: function() { this.page.url = 'https://jackd.github.io/posts/deterministic-tf-part-1/'; this.page.identifier = '/posts/deterministic-tf-part-1/'; } }; $.disqusLoader('#disqus', options); </script></div></div></div><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lozad/dist/lozad.min.js"></script> <script type="text/javascript"> const imgs = document.querySelectorAll('#post-wrapper img'); const observer = lozad(imgs); observer.observe(); </script><footer class="d-flex w-100 justify-content-center"><div class="d-flex justify-content-between align-items-center"><div class="footer-left"><p class="mb-0"> © 2025 <a href="https://twitter.com/dombombau">Dominic Jack</a>. <span data-toggle="tooltip" data-placement="top" title="Except where otherwise noted, the blog posts on this site are licensed under the Creative Commons Attribution 4.0 International (CC BY 4.0) License by the author.">Some rights reserved.</span></p></div><div class="footer-right"><p class="mb-0"> Powered by <a href="https://jekyllrb.com" target="_blank" rel="noopener">Jekyll</a> with <a href="https://github.com/cotes2020/jekyll-theme-chirpy/" target="_blank" rel="noopener">Chirpy</a> theme.</p></div></div></footer></div><div id="search-result-wrapper" class="d-flex justify-content-center unloaded"><div class="col-12 col-xl-11 post-content"><div id="search-hints"><h4 class="text-muted mb-4">Trending Tags</h4><a class="post-tag" href="/tags/performance/">performance</a> <a class="post-tag" href="/tags/benchmarks/">benchmarks</a> <a class="post-tag" href="/tags/autograd/">autograd</a> <a class="post-tag" href="/tags/covid/">covid</a> <a class="post-tag" href="/tags/deterministic/">deterministic</a> <a class="post-tag" href="/tags/epidemiology/">epidemiology</a> <a class="post-tag" href="/tags/jax/">jax</a> <a class="post-tag" href="/tags/pre-emptible/">pre emptible</a> <a class="post-tag" href="/tags/finance/">finance</a> <a class="post-tag" href="/tags/parallel/">parallel</a></div><div id="search-results" class="d-flex flex-wrap justify-content-center text-muted mt-3"></div></div></div></div><div id="mask"></div><a id="back-to-top" href="#" aria-label="back-to-top" class="btn btn-lg btn-box-shadow" role="button"> <i class="fas fa-angle-up"></i> </a> <script src="https://cdn.jsdelivr.net/npm/simple-jekyll-search@1.7.3/dest/simple-jekyll-search.min.js"></script> <script> SimpleJekyllSearch({ searchInput: document.getElementById('search-input'), resultsContainer: document.getElementById('search-results'), json: '/assets/js/data/search.json', searchResultTemplate: '<div class="pl-1 pr-1 pl-sm-2 pr-sm-2 pl-lg-4 pr-lg-4 pl-xl-0 pr-xl-0"> <a href="https://jackd.github.io{url}">{title}</a><div class="post-meta d-flex flex-column flex-sm-row text-muted mt-1 mb-1"><div class="mr-sm-4"><i class="far fa-folder fa-fw"></i>{categories}</div><div><i class="fa fa-tag fa-fw"></i>{tags}</div></div><p>{snippet}</p></div>', noResultsText: '<p class="mt-5">Oops! No result founds.</p>' }); </script> <script async src="https://www.googletagmanager.com/gtag/js?id="></script> <script> window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', ''); </script>

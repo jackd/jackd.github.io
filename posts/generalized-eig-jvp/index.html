@@ -1,0 +1,335 @@
+<!DOCTYPE html><html lang="en" ><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><meta name="theme" content="Chirpy v2.6.2"><meta name="generator" content="Jekyll v4.4.1" /><meta property="og:title" content="Generalized Eigenvalue Problem Derivatives" /><meta name="author" content="Dominic Jack" /><meta property="og:locale" content="en_US" /><meta name="description" content="Papers, projects and posts about deep learning theory and applications" /><meta property="og:description" content="Papers, projects and posts about deep learning theory and applications" /><link rel="canonical" href="https://jackd.github.io/posts/generalized-eig-jvp/" /><meta property="og:url" content="https://jackd.github.io/posts/generalized-eig-jvp/" /><meta property="og:site_name" content="jackd" /><meta property="og:image" content="https://jackd.github.io/assets/img/posts/jax.png" /><meta property="og:type" content="article" /><meta property="article:published_time" content="2021-01-21T11:00:01+10:00" /><meta name="twitter:card" content="summary_large_image" /><meta property="twitter:image" content="https://jackd.github.io/assets/img/posts/jax.png" /><meta property="twitter:title" content="Generalized Eigenvalue Problem Derivatives" /><meta name="twitter:site" content="@dombombau" /><meta name="twitter:creator" content="@Dominic Jack" /><meta name="google-site-verification" content="google_meta_tag_verification" /> <script type="application/ld+json"> {"description":"Papers, projects and posts about deep learning theory and applications","author":{"@type":"Person","name":"Dominic Jack"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://jackd.github.io/posts/generalized-eig-jvp/"},"headline":"Generalized Eigenvalue Problem Derivatives","dateModified":"2021-01-28T18:08:34+10:00","datePublished":"2021-01-21T11:00:01+10:00","url":"https://jackd.github.io/posts/generalized-eig-jvp/","@type":"BlogPosting","image":"https://jackd.github.io/assets/img/posts/jax.png","@context":"https://schema.org"}</script><title>Generalized Eigenvalue Problem Derivatives | jackd</title><link rel="shortcut icon" href="/assets/img/favicons/favicon.ico" type="image/x-icon"><link rel="icon" href="/assets/img/favicons/favicon.ico" type="image/x-icon"><link rel="apple-touch-icon" href="/assets/img/favicons/apple-icon.png"><link rel="apple-touch-icon" href="/assets/img/favicons/apple-icon-precomposed.png"><link rel="apple-touch-icon" sizes="57x57" href="/assets/img/favicons/apple-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/assets/img/favicons/apple-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/assets/img/favicons/apple-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/assets/img/favicons/apple-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/assets/img/favicons/apple-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/assets/img/favicons/apple-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/assets/img/favicons/apple-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/assets/img/favicons/apple-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/assets/img/favicons/apple-icon-180x180.png"><link rel="icon" type="image/png" sizes="192x192" href="/assets/img/favicons/android-icon-192x192.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicons/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/assets/img/favicons/favicon-96x96.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/img/favicons/favicon-16x16.png"><link rel="manifest" href="/assets/img/favicons/manifest.json"><meta name='msapplication-config' content='/assets/img/favicons/browserconfig.xml'><meta name="msapplication-TileColor" content="#ffffff"><meta name="msapplication-TileImage" content="/assets/img/favicons/ms-icon-144x144.png"><meta name="theme-color" content="#ffffff"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"><link rel="dns-prefetch" href="https://fonts.gstatic.com"><link rel="preconnect" href="https://www.google-analytics.com" crossorigin="use-credentials"><link rel="dns-prefetch" href="https://www.google-analytics.com"><link rel="preconnect" href="https://www.googletagmanager.com" crossorigin="anonymous"><link rel="dns-prefetch" href="https://www.googletagmanager.com"><link rel="preconnect" href="cdn.jsdelivr.net"><link rel="dns-prefetch" href="cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha256-LA89z+k9fjgMKQ/kq4OO2Mrf8VltYml/VES+Rg0fh20=" crossorigin="anonymous"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.11.2/css/all.min.css" integrity="sha256-+N4/V/SbAFiW1MPBCXnfnP9QSN3+Keu+NlB+0ev/YKQ=" crossorigin="anonymous"><link rel="preload" href="/assets/css/post.css" as="style"><link rel="stylesheet" href="/assets/css/post.css"><link rel="preload" as="style" href="/assets/css/lib/bootstrap-toc.min.css"><link rel="stylesheet" href="/assets/css/lib/bootstrap-toc.min.css" /> <script src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script> <script async src="https://cdn.jsdelivr.net/combine/npm/popper.js@1.15.0,npm/bootstrap@4/dist/js/bootstrap.min.js"></script> <script async src="/assets/js/post.min.js"></script> <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script> <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script> <script defer src="/app.js"></script><body data-spy="scroll" data-target="#toc"><div id="sidebar" class="d-flex flex-column"><div id="nav-wrapper"><div id="profile-wrapper" class="d-flex flex-column"><div id="avatar" class="d-flex justify-content-center"> <a href="/" alt="avatar"> <img src="/assets/img/dom-cvpr.jpg" alt="avatar" onerror="this.style.display='none'"> </a></div><div class="profile-text mt-3"><div class="site-title"> <a href="/">jackd</a></div><div class="site-subtitle font-italic">Deep Learning Researcher</div></div></div><ul class="nav flex-column"><li class="nav-item d-flex justify-content-center "> <a href="/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-home ml-xl-3 mr-xl-3 unloaded"></i> <span>HOME</span> </a><li class="nav-item d-flex justify-content-center "> <a href="/tabs/papers/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-scroll ml-xl-3 mr-xl-3 unloaded"></i> <span>PAPERS</span> </a><li class="nav-item d-flex justify-content-center "> <a href="/tabs/projects/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-code ml-xl-3 mr-xl-3 unloaded"></i> <span>PROJECTS</span> </a><li class="nav-item d-flex justify-content-center "> <a href="/tabs/about/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-info ml-xl-3 mr-xl-3 unloaded"></i> <span>ABOUT</span> </a><li class="nav-item d-flex justify-content-center "> <a href="/tabs/categories/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-stream ml-xl-3 mr-xl-3 unloaded"></i> <span>CATEGORIES</span> </a><li class="nav-item d-flex justify-content-center "> <a href="/tabs/tags/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-tags ml-xl-3 mr-xl-3 unloaded"></i> <span>TAGS</span> </a><li class="nav-item d-flex justify-content-center "> <a href="/tabs/archives/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-archive ml-xl-3 mr-xl-3 unloaded"></i> <span>ARCHIVES</span> </a></ul></div><div class="sidebar-bottom d-flex flex-wrap justify-content-around mt-4"> <span id="mode-toggle-wrapper"> <i class="mode-toggle fas fa-adjust"></i> <script type="text/javascript"> class ModeToggle { static get MODE_KEY() { return "mode"; } static get DARK_MODE() { return "dark"; } static get LIGHT_MODE() { return "light"; } constructor() { if (this.mode != null) { if (this.mode == ModeToggle.DARK_MODE) { if (!this.isSysDarkPrefer) { this.setDark(); } } else { if (this.isSysDarkPrefer) { this.setLight(); } } } var self = this; /* always follow the system prefers */ this.sysDarkPrefers.addListener(function() { if (self.mode != null) { if (self.mode == ModeToggle.DARK_MODE) { if (!self.isSysDarkPrefer) { self.setDark(); } } else { if (self.isSysDarkPrefer) { self.setLight(); } } self.clearMode(); } }); } /* constructor() */ setDark() { $('html').attr(ModeToggle.MODE_KEY, ModeToggle.DARK_MODE); sessionStorage.setItem(ModeToggle.MODE_KEY, ModeToggle.DARK_MODE); } setLight() { $('html').attr(ModeToggle.MODE_KEY, ModeToggle.LIGHT_MODE); sessionStorage.setItem(ModeToggle.MODE_KEY, ModeToggle.LIGHT_MODE); } clearMode() { $('html').removeAttr(ModeToggle.MODE_KEY); sessionStorage.removeItem(ModeToggle.MODE_KEY); } get sysDarkPrefers() { return window.matchMedia("(prefers-color-scheme: dark)"); } get isSysDarkPrefer() { return this.sysDarkPrefers.matches; } get isDarkMode() { return this.mode == ModeToggle.DARK_MODE; } get isLightMode() { return this.mode == ModeToggle.LIGHT_MODE; } get hasMode() { return this.mode != null; } get mode() { return sessionStorage.getItem(ModeToggle.MODE_KEY); } flipMode() { if (this.hasMode) { if (this.isSysDarkPrefer) { if (this.isLightMode) { this.clearMode(); } else { this.setLight(); } } else { if (this.isDarkMode) { this.clearMode(); } else { this.setDark(); } } } else { if (this.isSysDarkPrefer) { this.setLight(); } else { this.setDark(); } } } /* flipMode() */ } /* ModeToggle */ let toggle = new ModeToggle(); $(".mode-toggle").click(function() { toggle.flipMode(); }); </script> </span> <span class="icon-border"></span> <a href="https://github.com/jackd" aria-label="github" target="_blank" rel="noopener"> <i class="fab fa-github-alt"></i> </a> <a href="https://twitter.com/dombombau" aria-label="twitter" target="_blank" rel="noopener"> <i class="fab fa-twitter"></i> </a> <a href=" javascript:location.href = 'mailto:' + ['thedomjack','gmail.com'].join('@')" aria-label="email" > <i class="fas fa-envelope"></i> </a> <a href="/feed.xml" aria-label="rss" > <i class="fas fa-rss"></i> </a></div></div><div id="topbar-wrapper" class="row justify-content-center topbar-down"><div id="topbar" class="col-11 d-flex h-100 align-items-center justify-content-between"> <span id="breadcrumb"> <span> <a href="/"> Posts </a> </span> <span>Generalized Eigenvalue Problem Derivatives</span> </span> <i id="sidebar-trigger" class="fas fa-bars fa-fw"></i><div id="topbar-title"> Post</div><i id="search-trigger" class="fas fa-search fa-fw"></i> <span id="search-wrapper" class="align-items-center"> <i class="fas fa-search fa-fw"></i> <input class="form-control" id="search-input" type="search" aria-label="search" placeholder="Search..."> <i class="fa fa-times-circle fa-fw" id="search-cleaner"></i> </span> <span id="search-cancel" >Cancel</span></div></div><div id="main-wrapper"><div id="main"><div class="row"><div id="post-wrapper" class="col-12 col-lg-11 col-xl-8"><div class="post pl-1 pr-1 pl-sm-2 pr-sm-2 pl-md-4 pr-md-4"><h1 data-toc-skip>Generalized Eigenvalue Problem Derivatives</h1><div class="post-meta text-muted d-flex flex-column"><div> Posted <span class="timeago " data-toggle="tooltip" data-placement="bottom" title="Thu, Jan 21, 2021, 11:00 AM +1000" > Jan 21, 2021 <i class="unloaded">2021-01-21T11:00:01+10:00</i> </span> by <span class="author"> Dominic Jack </span></div><div> Updated <span class="timeago lastmod" data-toggle="tooltip" data-placement="bottom" title="Thu, Jan 28, 2021, 6:08 PM +1000" > Jan 28, 2021 <i class="unloaded">2021-01-28T18:08:34+10:00</i> </span></div></div><div class="post-content"> <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7 " data-src="/assets/img/posts/jax.png" class="post-preview-img"> <script> window.MathJax = { tex: { tags: 'ams', inlineMath: [['$', '$'], ['\\(', '\\)']] } }; </script><p>The eigenvector problem is ubiquitous in many areas of mathematics, physics and computer science. I recently found myself needing the solution to the generalized eigenvalue problem and discovered an implementation doesn’t exist in <a href="https://github.com/google/jax">jax</a>. While wrapping <a href="https://docs.nvidia.com/cuda/cusolver/index.html#sygvd-example1">low-level cuda code</a> is mechanical enough, this doesn’t help with one of the core features of jax: auto-differentiation.</p><p>A naive solution would be to re-write the algorithm that generates the decomposition. While this would get us a differentiable solution, it would suffer some major flaws. Most obviously:</p><ul><li>we’d have more code to maintain;<li>it likely would not be as efficient as the CUDA implementation; and<li>the automatically calculated derivatives would still be sub-optimal.</ul><p>Instead, we’re going to calculate derivatives using <em>implicit differentiation</em>. This is hardly a new idea, and there are numerous sources detailing results for the standard eigenvalue problem. That said, I was unable to find anything on the generalized problem. In this post, we’ll start by formally defining the problem, before adapting the approach of [Boeddeker <em>et al.</em>][boeddeker] to the generalized problem. In doing so, we identify what we believe to be a flaw in their solution, though identity a work-around for the self-adjoint case. A good understanding of the basics of linear algebra and calculus is assumed.</p><h2 id="problem-description">Problem Description</h2><div> \(\newcommand{\pd}[1]{\frac{\partial {#1}}{\partial \xi}}\) \(\newcommand{\A}{\mathbf{A}}\) \(\newcommand{\B}{\mathbf{B}}\) \(\newcommand{\W}{\mathbf{W}} % vectors\) \(\newcommand{\V}{\mathbf{V}} % values\) \(\newcommand{\dA}{\pd{\A}}\) \(\newcommand{\dB}{\pd{\B}}\) \(\newcommand{\dW}{\pd{\W}}\) \(\newcommand{\dWH}{\pd{\W^H}}\) \(\newcommand{\dV}{\pd{\V}}\) \(\newcommand{\Winv}{\W^{-1}}\) \(\newcommand{\Binv}{\B^{-1}}\) \(\newcommand{\Re}{\mathbb{R}e}\) \(\newcommand{\Im}{\mathbb{I}m}\)</div><p>We consider the problem of computing partial derivatives of $\W$ and $\V$ given the solution to the generalized eigenvalue and all other relevant partial derivatives. We start with the definition of the solutions to the problem, i.e.</p><p>\begin{equation} \A\W = \B \W \V, \label{eqn:definition} \end{equation} where the columns of $\W$ are the eigenvectors, $\V$ is a diagonal matrix with eigenvalues on the diagonal and square matrices $\A$ and $\B$ define the problem. We limit discussion to the case where the eigenvalues are distinct.</p><p>We note there is a degree of freedom in the magnitude of the returned eigenvectors. We ignore this for the moment, but will come back to it.</p><h2 id="a-partial-solution-to-the-general-problem">A Partial Solution to the General Problem</h2><p>We begin by taking the partial deriative of Equation \ref{eqn:definition}:</p><p>\begin{equation} \dA \W + \A \dW = \dB \W \V + \B \dW \V + \B \W \dV \end{equation}</p><p>Pre-multiplying by $\Winv \Binv$ yields \begin{equation} \Winv \Binv \dA \W + \Winv \Binv \A \dW = \Winv \Binv \left[\B\dW + \dB \W \right] \V + \Winv \Binv \B \W \dV \end{equation}</p><p>The second term on each side can be simplified: \begin{equation} \Winv \Binv \dA \W + \V \Winv \dW = \Winv \Binv \left[\B \dW + \dB \W\right] \V + \dV \end{equation}</p><p>Expanding and simplifying the first term on the right and shifting the second term on the left to the right yields \begin{equation} \Winv \Binv \dA \W = \Winv \dW \V - \V \Winv \dW + \Winv \Binv \dB \W \V + \dV \end{equation}</p><p>We can simplify the first two terms on the right by applying the identity $AD - DA = E \circ A$ for a diagonal matrix $D$, where $e_{ij} = d_{ii} - d_{jj}$ and $\circ$ denotes the Hadamard (element-wise) product.</p><p>\begin{equation} \Winv \Binv \dA \W = E \circ \Winv \dW + \Winv \Binv \dB \W \V + \dV \label{eqn:critical} \end{equation}</p><p>By noting that $I \circ E = \mathbf{0}$, the derivatives of the eigenvalues $\V$ can be decoupled from those of $\W$ by taking the Hadamard product of the identity matrix with Equation \ref{eqn:critical}: \begin{equation} \dV = I \circ \left[\Winv \Binv \left(\dA \W - \dB \W \V\right)\right]. \end{equation}</p><p>Extracting derivatives of $\W$ is trickier. To start with, we define matrix $F$ of the same size as $E$ with elements given by</p><div> \begin{equation} f_{ij} = \begin{cases} 0 &amp; i = j \\ \frac{1}{e_ij} &amp; i \neq j \end{cases}. \end{equation}</div><p>By noting the $F \circ E = \mathbf{1} - I$, taking the Hadamard product of equation \ref{eqn:critical} with $F$ yields \begin{equation} (\mathbf{1} - I)\circ \Winv \dW = F \circ \left[\Winv \Binv \left(\dA \W - \dB \W \V\right)\right]. \label{eqn:troublesome} \end{equation}</p><p>While everything on the right is straight-forward to compute, the Hadamard product on the left presents difficulties. <a href="https://people.maths.ox.ac.uk/gilesm/files/NA-08-01.pdf">Giles</a> proposes choosing scales of the eigenvectors such that the diagonal of $\Winv \dW$ are zero, though does not discuss how to compute such a scale. Note that contrary to the claims of <a href="https://arxiv.org/pdf/1701.00392.pdf">Boeddeker <em>et al.</em></a>, using normalized eigenvectors (or more generally, eigenvectors of fixed magnitude) does <em>not</em> guarantee this property.</p><p>We make no effort to resolve this for the general case. We argue that use-cases of eigenvectors should be invariant to this scaling, and derivatives would likely be computed more easily with respect to these quantities instead. For the interested reader, a good discussion of the problem is given <a href="https://re-ra.xyz/Gauge-Problem-in-Automatic-Differentiation/">here</a>.</p><h2 id="self-adjoint-case">Self-Adjoint Case</h2><p>One special case where computing derivatives is with respect to eigenvectors is relatively straight forward is in the self-adjoint case, where $\A = \A^H$ and $\B = \B^H$. In this case, eigenvectors form an orthogonal basis. Equation \ref{eqn:troublesome} can then be computed by enforcing magnitudes such that the eigenvectors are orthogonal with respect to $\B$, i.e. \begin{equation} \W^H \B \W = I \iff{\Winv = \W^H \B}. \label{eqn:orthonormal} \end{equation}</p><p>This allows for some simplifications to Equation \ref{eqn:troublesome}: \begin{equation} (\mathbf{1} - I)\circ \W^H \B \dW = F \circ \left[\W^H \left(\dA \W - \dB \W \V\right)\right]. \label{eqn:less-troublesome} \end{equation}</p><p>We still have the problem of the identity matrix in the Hadamard operator. We can distribute the product operator over addition ($[\mathbf{1} + I] \circ X = X + I \circ X$) but this still isn’t in a form we can compute easily compute. Fortunately, the orthonormal constraint gives us a mechanism by which we can express the diagonal values of $\dW$ in terms of other known values.</p><p>To understand how, we begin by differentiating Equation \ref{eqn:orthonormal} \begin{equation} \dWH \B \W + \W^H \dB \W + \W^H \B \dW = \mathbf{0}. \end{equation}</p><p>Since the first and third term are Hermitian transposes of each other, their complex components will cancel out on the diagonal. This means we can expression the real part of our troublesome term in terms of less problematic components.</p><div> \begin{equation} I \circ \Re\left[\W^H \B \dW\right] = -\frac{1}{2} I \circ \W^H \dB \W. \label{eqn:identity-hadamard} \end{equation}</div><p>Alas, this does not help us in evaluating the imaginary part. We do still have some freedom however: it can be shown if $\V, \W$ is a solution to the problem and satisfies the described orthogonality constraint, then $\V \mathbf{R}(\Theta)$ is also a solution, where $\mathbf{R}(\Theta)$ is a diagonal matrix with entries given by rotations in the complex plan, $R_{jj} = e^{i\theta_j}$. Exactly how we define $\theta_j$ in such a way that makes the remaining troublesome term computable is left to the reader (i.e. I’ve spent entirely too long trying and got nowhere).</p><h2 id="real-symmetric-case">Real Symmetric Case</h2><p>Like we did above, rather than overcome this dilemna we’ll simply claim we were never interested in the solution to the complex problem anyway.</p><p>For real $\A$ and $\B$ the imaginary part is zero. Substituting Equation \ref{eqn:identity-hadamard} into Equation \ref{eqn:less-troublesome} and rearranging gives us our final expression for the eigenvector derivatives: \begin{equation} \dW = \W \left( F \circ \left[\W^H\left(\dA \W - \dB \W \V\right)\right] - \frac{1}{2} I \circ \left[\W^H \dB \W\right]\right). \end{equation}</p><h2 id="jax-implementation">Jax Implementation</h2><p>No amount of reviewing maths will ever make me trust a solution as much as numerical validation. We implemented the above in <a href="https://github.com/google/jax">jax</a> (also available in <a href="https://gist.github.com/jackd/99e012090a56637b8dd8bb037374900e">this gist</a>).</p><p><code class="language-plaintext highlighter-rouge">eigh_impl.py</code>:</p><div class="language-python highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+</pre><td class="rouge-code"><pre><span class="sh">"""</span><span class="s">Versions based on 4.60 and 4.63 of https://arxiv.org/pdf/1701.00392.pdf .</span><span class="sh">"""</span>
+<span class="kn">import</span> <span class="n">jax</span>
+<span class="kn">import</span> <span class="n">jax.numpy</span> <span class="k">as</span> <span class="n">jnp</span>
+<span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">np</span>
+
+
+<span class="k">def</span> <span class="nf">_T</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">jnp</span><span class="p">.</span><span class="nf">swapaxes</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_H</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">jnp</span><span class="p">.</span><span class="nf">conj</span><span class="p">(</span><span class="nf">_T</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">symmetrize</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="nf">return </span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="nf">_H</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="o">/</span> <span class="mi">2</span>
+
+
+<span class="k">def</span> <span class="nf">standardize_angle</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">jnp</span><span class="p">.</span><span class="nf">isrealobj</span><span class="p">(</span><span class="n">w</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">w</span> <span class="o">*</span> <span class="n">jnp</span><span class="p">.</span><span class="nf">sign</span><span class="p">(</span><span class="n">w</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># scipy does this: makes imag(b[0] @ w) = 1
+</span>        <span class="k">assert</span> <span class="ow">not</span> <span class="n">jnp</span><span class="p">.</span><span class="nf">isrealobj</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+        <span class="n">bw</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">@</span> <span class="n">w</span>
+        <span class="n">factor</span> <span class="o">=</span> <span class="n">bw</span> <span class="o">/</span> <span class="n">jnp</span><span class="p">.</span><span class="nf">abs</span><span class="p">(</span><span class="n">bw</span><span class="p">)</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="n">w</span> <span class="o">/</span> <span class="n">factor</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">sign</span> <span class="o">=</span> <span class="n">jnp</span><span class="p">.</span><span class="nf">sign</span><span class="p">(</span><span class="n">w</span><span class="p">.</span><span class="n">real</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="n">w</span> <span class="o">*</span> <span class="n">sign</span>
+        <span class="k">return</span> <span class="n">w</span>
+
+
+<span class="nd">@jax.custom_jvp</span>  <span class="c1"># jax.scipy.linalg.eigh doesn't support general problem i.e. b not None
+</span><span class="k">def</span> <span class="nf">eigh</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">
+    Compute the solution to the symmetrized generalized eigenvalue problem.
+
+    a_s @ w = b_s @ w @ np.diag(v)
+
+    where a_s = (a + a.H) / 2, b_s = (b + b.H) / 2 are the symmetrized versions of the
+    inputs and H is the Hermitian (conjugate transpose) operator.
+
+    For self-adjoint inputs the solution should be consistent with `scipy.linalg.eigh`
+    i.e.
+
+    v, w = eigh(a, b)
+    v_sp, w_sp = scipy.linalg.eigh(a, b)
+    np.testing.assert_allclose(v, v_sp)
+    np.testing.assert_allclose(w, standardize_angle(w_sp))
+
+    Note this currently uses `jax.linalg.eig(jax.linalg.solve(b, a))`, which will be
+    slow because there is no GPU implementation of `eig` and it</span><span class="sh">'</span><span class="s">s just a generally
+    inefficient way of doing it. Future implementations should wrap cuda primitives.
+    This implementation is provided primarily as a means to test `eigh_jvp_rule`.
+
+    Args:
+        a: [n, n] float self-adjoint matrix (i.e. conj(transpose(a)) == a)
+        b: [n, n] float self-adjoint matrix (i.e. conj(transpose(b)) == b)
+
+    Returns:
+        v: eigenvalues of the generalized problem in ascending order.
+        w: eigenvectors of the generalized problem, normalized such that
+            w.H @ b @ w = I.
+    </span><span class="sh">"""</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="nf">symmetrize</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="nf">symmetrize</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+    <span class="n">b_inv_a</span> <span class="o">=</span> <span class="n">jax</span><span class="p">.</span><span class="n">scipy</span><span class="p">.</span><span class="n">linalg</span><span class="p">.</span><span class="nf">cho_solve</span><span class="p">(</span><span class="n">jax</span><span class="p">.</span><span class="n">scipy</span><span class="p">.</span><span class="n">linalg</span><span class="p">.</span><span class="nf">cho_factor</span><span class="p">(</span><span class="n">b</span><span class="p">),</span> <span class="n">a</span><span class="p">)</span>
+    <span class="n">v</span><span class="p">,</span> <span class="n">w</span> <span class="o">=</span> <span class="n">jax</span><span class="p">.</span><span class="nf">jit</span><span class="p">(</span><span class="n">jax</span><span class="p">.</span><span class="n">numpy</span><span class="p">.</span><span class="n">linalg</span><span class="p">.</span><span class="n">eig</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="sh">"</span><span class="s">cpu</span><span class="sh">"</span><span class="p">)(</span><span class="n">b_inv_a</span><span class="p">)</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="p">.</span><span class="n">real</span>
+    <span class="c1"># with loops.Scope() as s:
+</span>    <span class="c1">#     for _ in s.cond_range(jnp.isrealobj)
+</span>    <span class="k">if</span> <span class="n">jnp</span><span class="p">.</span><span class="nf">isrealobj</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="ow">and</span> <span class="n">jnp</span><span class="p">.</span><span class="nf">isrealobj</span><span class="p">(</span><span class="n">b</span><span class="p">):</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="n">w</span><span class="p">.</span><span class="n">real</span>
+    <span class="c1"># reorder as ascending in w
+</span>    <span class="n">order</span> <span class="o">=</span> <span class="n">jnp</span><span class="p">.</span><span class="nf">argsort</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="p">.</span><span class="nf">take</span><span class="p">(</span><span class="n">order</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">w</span><span class="p">.</span><span class="nf">take</span><span class="p">(</span><span class="n">order</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="c1"># renormalize so v.H @ b @ H == 1
+</span>    <span class="n">norm2</span> <span class="o">=</span> <span class="n">jax</span><span class="p">.</span><span class="nf">vmap</span><span class="p">(</span><span class="k">lambda</span> <span class="n">wi</span><span class="p">:</span> <span class="p">(</span><span class="n">wi</span><span class="p">.</span><span class="nf">conj</span><span class="p">()</span> <span class="o">@</span> <span class="n">b</span> <span class="o">@</span> <span class="n">wi</span><span class="p">).</span><span class="n">real</span><span class="p">,</span> <span class="n">in_axes</span><span class="o">=</span><span class="mi">1</span><span class="p">)(</span><span class="n">w</span><span class="p">)</span>
+    <span class="n">norm</span> <span class="o">=</span> <span class="n">jnp</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">(</span><span class="n">norm2</span><span class="p">)</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">w</span> <span class="o">/</span> <span class="n">norm</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="nf">standardize_angle</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">v</span><span class="p">,</span> <span class="n">w</span>
+
+
+<span class="nd">@eigh.defjvp</span>
+<span class="k">def</span> <span class="nf">eigh_jvp_rule</span><span class="p">(</span><span class="n">primals</span><span class="p">,</span> <span class="n">tangents</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">
+    Derivation based on Boedekker et al.
+
+    https://arxiv.org/pdf/1701.00392.pdf
+
+    Note diagonal entries of Winv dW/dt != 0 as they claim.
+    </span><span class="sh">"""</span>
+    <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">primals</span>
+    <span class="n">da</span><span class="p">,</span> <span class="n">db</span> <span class="o">=</span> <span class="n">tangents</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nf">all</span><span class="p">(</span><span class="n">jnp</span><span class="p">.</span><span class="nf">isrealobj</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">da</span><span class="p">,</span> <span class="n">db</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="nc">NotImplementedError</span><span class="p">(</span><span class="sh">"</span><span class="s">jvp only implemented for real inputs.</span><span class="sh">"</span><span class="p">)</span>
+    <span class="n">da</span> <span class="o">=</span> <span class="nf">symmetrize</span><span class="p">(</span><span class="n">da</span><span class="p">)</span>
+    <span class="n">db</span> <span class="o">=</span> <span class="nf">symmetrize</span><span class="p">(</span><span class="n">db</span><span class="p">)</span>
+
+    <span class="n">v</span><span class="p">,</span> <span class="n">w</span> <span class="o">=</span> <span class="nf">eigh</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+
+    <span class="c1"># compute only the diagonal entries
+</span>    <span class="n">dv</span> <span class="o">=</span> <span class="n">jax</span><span class="p">.</span><span class="nf">vmap</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">vi</span><span class="p">,</span> <span class="n">wi</span><span class="p">:</span> <span class="o">-</span><span class="n">wi</span><span class="p">.</span><span class="nf">conj</span><span class="p">()</span> <span class="o">@</span> <span class="n">db</span> <span class="o">@</span> <span class="n">wi</span> <span class="o">*</span> <span class="n">vi</span> <span class="o">+</span> <span class="n">wi</span><span class="p">.</span><span class="nf">conj</span><span class="p">()</span> <span class="o">@</span> <span class="n">da</span> <span class="o">@</span> <span class="n">wi</span><span class="p">,</span> <span class="n">in_axes</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="p">)(</span><span class="n">v</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
+
+    <span class="n">dv</span> <span class="o">=</span> <span class="n">dv</span><span class="p">.</span><span class="n">real</span>
+
+    <span class="n">E</span> <span class="o">=</span> <span class="n">v</span><span class="p">[</span><span class="n">jnp</span><span class="p">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">v</span><span class="p">[:,</span> <span class="n">jnp</span><span class="p">.</span><span class="n">newaxis</span><span class="p">]</span>
+
+    <span class="c1"># diagonal entries: compute as column then put into diagonals
+</span>    <span class="n">diags</span> <span class="o">=</span> <span class="n">jnp</span><span class="p">.</span><span class="nf">diag</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">jax</span><span class="p">.</span><span class="nf">vmap</span><span class="p">(</span><span class="k">lambda</span> <span class="n">wi</span><span class="p">:</span> <span class="n">wi</span><span class="p">.</span><span class="nf">conj</span><span class="p">()</span> <span class="o">@</span> <span class="n">db</span> <span class="o">@</span> <span class="n">wi</span><span class="p">,</span> <span class="n">in_axes</span><span class="o">=</span><span class="mi">1</span><span class="p">)(</span><span class="n">w</span><span class="p">))</span>
+    <span class="c1"># off-diagonals: there will be NANs on the diagonal, but these aren't used
+</span>    <span class="n">off_diags</span> <span class="o">=</span> <span class="n">jnp</span><span class="p">.</span><span class="nf">reciprocal</span><span class="p">(</span><span class="n">E</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="nf">_H</span><span class="p">(</span><span class="n">w</span><span class="p">)</span> <span class="o">@</span> <span class="p">(</span><span class="n">da</span> <span class="o">@</span> <span class="n">w</span> <span class="o">-</span> <span class="n">db</span> <span class="o">@</span> <span class="n">w</span> <span class="o">*</span> <span class="n">v</span><span class="p">[</span><span class="n">jnp</span><span class="p">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]))</span>
+
+    <span class="n">dw</span> <span class="o">=</span> <span class="n">w</span> <span class="o">@</span> <span class="n">jnp</span><span class="p">.</span><span class="nf">where</span><span class="p">(</span><span class="n">jnp</span><span class="p">.</span><span class="nf">eye</span><span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="p">.</span><span class="nb">bool</span><span class="p">),</span> <span class="n">diags</span><span class="p">,</span> <span class="n">off_diags</span><span class="p">)</span>
+
+    <span class="nf">return </span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">w</span><span class="p">),</span> <span class="p">(</span><span class="n">dv</span><span class="p">,</span> <span class="n">dw</span><span class="p">)</span>
+</pre></table></code></div></div><p>Dirty testing script:</p><div class="language-python highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+</pre><td class="rouge-code"><pre><span class="kn">from</span> <span class="n">eigh_impl</span> <span class="kn">import</span> <span class="n">symmetrize</span><span class="p">,</span> <span class="n">eigh</span><span class="p">,</span> <span class="n">standardize_angle</span>
+<span class="kn">import</span> <span class="n">jax.numpy</span> <span class="k">as</span> <span class="n">jnp</span>
+<span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">np</span>
+
+<span class="kn">import</span> <span class="n">jax.test_util</span> <span class="k">as</span> <span class="n">jtu</span>
+<span class="kn">import</span> <span class="n">scipy.linalg</span>
+
+<span class="n">jnp</span><span class="p">.</span><span class="nf">set_printoptions</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">default_rng</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">n</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">is_complex</span> <span class="o">=</span> <span class="bp">False</span>
+
+
+<span class="k">def</span> <span class="nf">make_spd</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">x</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="nf">symmetrize</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="n">n</span> <span class="o">*</span> <span class="n">jnp</span><span class="p">.</span><span class="nf">eye</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">get_random_square</span><span class="p">(</span><span class="n">rng</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">is_complex</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="n">real</span> <span class="o">=</span> <span class="n">rng</span><span class="p">.</span><span class="nf">uniform</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">).</span><span class="nf">astype</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">is_complex</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">real</span> <span class="o">+</span> <span class="n">rng</span><span class="p">.</span><span class="nf">uniform</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">).</span><span class="nf">astype</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1j</span>
+    <span class="k">return</span> <span class="n">real</span>
+
+
+<span class="n">a</span> <span class="o">=</span> <span class="nf">make_spd</span><span class="p">(</span><span class="nf">get_random_square</span><span class="p">(</span><span class="n">rng</span><span class="p">,</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">),</span> <span class="n">is_complex</span><span class="o">=</span><span class="n">is_complex</span><span class="p">))</span>
+<span class="n">b</span> <span class="o">=</span> <span class="nf">make_spd</span><span class="p">(</span><span class="nf">get_random_square</span><span class="p">(</span><span class="n">rng</span><span class="p">,</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">),</span> <span class="n">is_complex</span><span class="o">=</span><span class="n">is_complex</span><span class="p">))</span>
+
+<span class="n">vals</span><span class="p">,</span> <span class="n">vecs</span> <span class="o">=</span> <span class="nf">eigh</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+<span class="c1"># ensure solution satisfies the problem
+</span><span class="n">np</span><span class="p">.</span><span class="n">testing</span><span class="p">.</span><span class="nf">assert_allclose</span><span class="p">(</span><span class="n">a</span> <span class="o">@</span> <span class="n">vecs</span><span class="p">,</span> <span class="n">b</span> <span class="o">@</span> <span class="n">vecs</span> <span class="o">@</span> <span class="n">jnp</span><span class="p">.</span><span class="nf">diag</span><span class="p">(</span><span class="n">vals</span><span class="p">),</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">)</span>
+<span class="c1"># ensure vectors are orthogonal w.r.t b
+</span><span class="n">np</span><span class="p">.</span><span class="n">testing</span><span class="p">.</span><span class="nf">assert_allclose</span><span class="p">(</span><span class="n">vecs</span><span class="p">.</span><span class="n">T</span><span class="p">.</span><span class="nf">conj</span><span class="p">()</span> <span class="o">@</span> <span class="n">b</span> <span class="o">@</span> <span class="n">vecs</span><span class="p">,</span> <span class="n">jnp</span><span class="p">.</span><span class="nf">eye</span><span class="p">(</span><span class="n">n</span><span class="p">),</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">)</span>
+<span class="c1"># ensure eigenvalues are ascending
+</span><span class="n">np</span><span class="p">.</span><span class="n">testing</span><span class="p">.</span><span class="nf">assert_array_less</span><span class="p">(</span><span class="n">vals</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">vals</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+<span class="n">jtu</span><span class="p">.</span><span class="nf">check_grads</span><span class="p">(</span><span class="n">eigh</span><span class="p">,</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">),</span> <span class="mi">2</span><span class="p">,</span> <span class="n">modes</span><span class="o">=</span><span class="p">[</span><span class="sh">"</span><span class="s">fwd</span><span class="sh">"</span><span class="p">])</span>
+
+<span class="c1"># ensure values consistent with scipy
+</span><span class="n">vals_sp</span><span class="p">,</span> <span class="n">vecs_sp</span> <span class="o">=</span> <span class="n">scipy</span><span class="p">.</span><span class="n">linalg</span><span class="p">.</span><span class="nf">eigh</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">scipy</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">vecs_sp</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">this work</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">vecs</span><span class="p">)</span>
+<span class="n">np</span><span class="p">.</span><span class="n">testing</span><span class="p">.</span><span class="nf">assert_allclose</span><span class="p">(</span><span class="n">vals</span><span class="p">,</span> <span class="n">vals_sp</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">)</span>
+<span class="n">np</span><span class="p">.</span><span class="n">testing</span><span class="p">.</span><span class="nf">assert_allclose</span><span class="p">(</span><span class="n">vecs</span><span class="p">,</span> <span class="nf">standardize_angle</span><span class="p">(</span><span class="n">vecs_sp</span><span class="p">,</span> <span class="n">b</span><span class="p">),</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">success</span><span class="sh">"</span><span class="p">)</span>
+</pre></table></code></div></div></div><div class="post-tail-wrapper text-muted"><div class="post-meta mb-3"> <i class="far fa-folder-open fa-fw mr-1"></i> <a href='/categories/linear-algebra/'>Linear Algebra</a></div><div class="post-tags"> <i class="fa fa-tags fa-fw mr-1"></i> <a href="/tags/jax/" class="post-tag no-text-decoration" >jax</a> <a href="/tags/autograd/" class="post-tag no-text-decoration" >autograd</a></div><div class="post-tail-bottom d-flex justify-content-between align-items-center mt-3 pt-5 pb-2"><div class="license-wrapper"> This post is licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> by the author.</div><div class="share-wrapper"> <span class="share-label text-muted mr-1">Share</span> <span class="share-icons"> <a href="https://twitter.com/intent/tweet?text=Generalized Eigenvalue Problem Derivatives - jackd&url=https://jackd.github.io/posts/generalized-eig-jvp/" data-toggle="tooltip" data-placement="top" title="Twitter" target="_blank" rel="noopener" aria-label="Twitter"> <i class="fa-fw fab fa-twitter"></i> </a> <a href="https://www.facebook.com/sharer/sharer.php?title=Generalized Eigenvalue Problem Derivatives - jackd&u=https://jackd.github.io/posts/generalized-eig-jvp/" data-toggle="tooltip" data-placement="top" title="Facebook" target="_blank" rel="noopener" aria-label="Facebook"> <i class="fa-fw fab fa-facebook-square"></i> </a> <a href="https://telegram.me/share?text=Generalized Eigenvalue Problem Derivatives - jackd&url=https://jackd.github.io/posts/generalized-eig-jvp/" data-toggle="tooltip" data-placement="top" title="Telegram" target="_blank" rel="noopener" aria-label="Telegram"> <i class="fa-fw fab fa-telegram"></i> </a> <i class="fa-fw fas fa-link small" onclick="copyLink()" data-toggle="tooltip" data-placement="top" title="Copy link"></i> </span></div></div></div></div></div><div id="panel-wrapper" class="col-xl-3 pl-2 text-muted topbar-down"><div class="access"><div id="access-lastmod" class="post"> <span>Recent Update</span><ul class="post-content pl-0 pb-1 ml-1 mt-2"><li><a href="/posts/mpt/">Negative Gearing and the CGT Discount: A Modern Portfolio Theory Analysis</a><li><a href="/posts/retention/">Retention LLMs: Analysing Algorithms and Alternative Implementations</a><li><a href="/posts/simple-fast-attention/">Simple Fast Attention: Causal Implementation Experiments</a><li><a href="/posts/doherty-init/">Digging into Doherty: Implications of Initialization</a><li><a href="/posts/generalized-eig-jvp/">Generalized Eigenvalue Problem Derivatives</a></ul></div><div id="access-tags"> <span>Trending Tags</span><div class="d-flex flex-wrap mt-3 mb-1 mr-3"> <a class="post-tag" href="/tags/performance/">performance</a> <a class="post-tag" href="/tags/benchmarks/">benchmarks</a> <a class="post-tag" href="/tags/autograd/">autograd</a> <a class="post-tag" href="/tags/covid/">covid</a> <a class="post-tag" href="/tags/deterministic/">deterministic</a> <a class="post-tag" href="/tags/epidemiology/">epidemiology</a> <a class="post-tag" href="/tags/jax/">jax</a> <a class="post-tag" href="/tags/pre-emptible/">pre emptible</a> <a class="post-tag" href="/tags/finance/">finance</a> <a class="post-tag" href="/tags/parallel/">parallel</a></div></div></div><div id="toc-wrapper" class="pl-0 pr-4 mb-5"> <span class="pl-3 pt-2 mb-2">Contents</span><nav id="toc" data-toggle="toc"></nav></div></div></div><div class="row"><div class="col-12 col-lg-11 col-xl-8"><div id="post-extend-wrapper" class="pl-1 pr-1 pl-sm-2 pr-sm-2 pl-md-4 pr-md-4"><div id="related-posts" class="mt-5 mb-2 mb-sm-4"><h3 class="pt-2 mt-1 mb-4 ml-1" data-toc-skip>Further Reading</h3><div class="card-deck mb-4"><div class="card"> <a href="/posts/deq/"><div class="card-body"> <span class="timeago small" > Jul 20, 2021 <i class="unloaded">2021-07-20T11:00:01+10:00</i> </span><h3 class="pt-0 mt-1 mb-3" data-toc-skip>Deep Equilibrium Models in Jax</h3><div class="text-muted small"><p> Implicit layers and Deep Equilibrium models (DEQ) have recently been proposed as memory-efficient alternatives to super-deep networks. In this post we explore: the mathematical background be...</p></div></div></a></div><div class="card"> <a href="/posts/simple-fast-attention/"><div class="card-body"> <span class="timeago small" > Nov 30, 2022 <i class="unloaded">2022-11-30T11:00:01+10:00</i> </span><h3 class="pt-0 mt-1 mb-3" data-toc-skip>Simple Fast Attention: Causal Implementation Experiments</h3><div class="text-muted small"><p> Having looked at google-research’s fast attention tensorflow implementation and corresponding blog post, I was left scratching my head about the causal attention implementation. This post discuss...</p></div></div></a></div><div class="card"> <a href="/posts/mpt/"><div class="card-body"> <span class="timeago small" > Jul 14 <i class="unloaded">2025-07-14T11:00:01+10:00</i> </span><h3 class="pt-0 mt-1 mb-3" data-toc-skip>Negative Gearing and the CGT Discount: A Modern Portfolio Theory Analysis</h3><div class="text-muted small"><p> Introduction The capital gains tax (CGT) discount was introduced in Australia in 1999 to simplify and incentivize investment in the share market. More recently, in the midst of a housing crisis,...</p></div></div></a></div></div></div><div class="post-navigation d-flex justify-content-between"> <a href="/posts/deterministic-tf-part-2/" class="btn btn-outline-primary"><p>Deterministic Tensorflow Part 2: Data Augmentation</p></a> <a href="/posts/micro-benchmarks-tf2/" class="btn btn-outline-primary"><p>Micro-benchmarking in TF2</p></a></div><div id="disqus" class="pt-2 pb-2"><p class="font-italic text-center text-muted small"> Comments powered by <a href="https://disqus.com/">Disqus</a>.</p></div><script src="/assets/js/lib/jquery.disqusloader.min.js"></script> <script> var options = { scriptUrl: '//jackd.disqus.com/embed.js', disqusConfig: function() { this.page.url = 'https://jackd.github.io/posts/generalized-eig-jvp/'; this.page.identifier = '/posts/generalized-eig-jvp/'; } }; $.disqusLoader('#disqus', options); </script></div></div></div><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lozad/dist/lozad.min.js"></script> <script type="text/javascript"> const imgs = document.querySelectorAll('#post-wrapper img'); const observer = lozad(imgs); observer.observe(); </script><footer class="d-flex w-100 justify-content-center"><div class="d-flex justify-content-between align-items-center"><div class="footer-left"><p class="mb-0"> © 2025 <a href="https://twitter.com/dombombau">Dominic Jack</a>. <span data-toggle="tooltip" data-placement="top" title="Except where otherwise noted, the blog posts on this site are licensed under the Creative Commons Attribution 4.0 International (CC BY 4.0) License by the author.">Some rights reserved.</span></p></div><div class="footer-right"><p class="mb-0"> Powered by <a href="https://jekyllrb.com" target="_blank" rel="noopener">Jekyll</a> with <a href="https://github.com/cotes2020/jekyll-theme-chirpy/" target="_blank" rel="noopener">Chirpy</a> theme.</p></div></div></footer></div><div id="search-result-wrapper" class="d-flex justify-content-center unloaded"><div class="col-12 col-xl-11 post-content"><div id="search-hints"><h4 class="text-muted mb-4">Trending Tags</h4><a class="post-tag" href="/tags/performance/">performance</a> <a class="post-tag" href="/tags/benchmarks/">benchmarks</a> <a class="post-tag" href="/tags/autograd/">autograd</a> <a class="post-tag" href="/tags/covid/">covid</a> <a class="post-tag" href="/tags/deterministic/">deterministic</a> <a class="post-tag" href="/tags/epidemiology/">epidemiology</a> <a class="post-tag" href="/tags/jax/">jax</a> <a class="post-tag" href="/tags/pre-emptible/">pre emptible</a> <a class="post-tag" href="/tags/finance/">finance</a> <a class="post-tag" href="/tags/parallel/">parallel</a></div><div id="search-results" class="d-flex flex-wrap justify-content-center text-muted mt-3"></div></div></div></div><div id="mask"></div><a id="back-to-top" href="#" aria-label="back-to-top" class="btn btn-lg btn-box-shadow" role="button"> <i class="fas fa-angle-up"></i> </a> <script src="https://cdn.jsdelivr.net/npm/simple-jekyll-search@1.7.3/dest/simple-jekyll-search.min.js"></script> <script> SimpleJekyllSearch({ searchInput: document.getElementById('search-input'), resultsContainer: document.getElementById('search-results'), json: '/assets/js/data/search.json', searchResultTemplate: '<div class="pl-1 pr-1 pl-sm-2 pr-sm-2 pl-lg-4 pr-lg-4 pl-xl-0 pr-xl-0"> <a href="https://jackd.github.io{url}">{title}</a><div class="post-meta d-flex flex-column flex-sm-row text-muted mt-1 mb-1"><div class="mr-sm-4"><i class="far fa-folder fa-fw"></i>{categories}</div><div><i class="fa fa-tag fa-fw"></i>{tags}</div></div><p>{snippet}</p></div>', noResultsText: '<p class="mt-5">Oops! No result founds.</p>' }); </script> <script async src="https://www.googletagmanager.com/gtag/js?id="></script> <script> window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', ''); </script>

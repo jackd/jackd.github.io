@@ -1,0 +1,389 @@
+<!DOCTYPE html><html lang="en" ><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><meta name="theme" content="Chirpy v2.6.2"><meta name="generator" content="Jekyll v4.4.1" /><meta property="og:title" content="Deterministic Tensorflow Part 2: Data Augmentation" /><meta name="author" content="Dominic Jack" /><meta property="og:locale" content="en_US" /><meta name="description" content="Data augmentation is commonly used to artificially inflate the size of training datasets and teach networks invariances to various transformations. For example, image classification networks often train better when their datasets are augmented with random rotations, lighting adjustments and random flips. This article focuses on methods of performing augmentation that is both deterministic (the same each time a program is run) and pre-emptible (able to be interrupted and resumed without affecting results). Deciding which augmentations to apply for any given model is beyond the scope of this article." /><meta property="og:description" content="Data augmentation is commonly used to artificially inflate the size of training datasets and teach networks invariances to various transformations. For example, image classification networks often train better when their datasets are augmented with random rotations, lighting adjustments and random flips. This article focuses on methods of performing augmentation that is both deterministic (the same each time a program is run) and pre-emptible (able to be interrupted and resumed without affecting results). Deciding which augmentations to apply for any given model is beyond the scope of this article." /><link rel="canonical" href="https://jackd.github.io/posts/deterministic-tf-part-2/" /><meta property="og:url" content="https://jackd.github.io/posts/deterministic-tf-part-2/" /><meta property="og:site_name" content="jackd" /><meta property="og:image" content="https://jackd.github.io/assets/img/posts/pre-emptible-venn.jpg" /><meta property="og:type" content="article" /><meta property="article:published_time" content="2020-12-06T11:00:01+10:00" /><meta name="twitter:card" content="summary_large_image" /><meta property="twitter:image" content="https://jackd.github.io/assets/img/posts/pre-emptible-venn.jpg" /><meta property="twitter:title" content="Deterministic Tensorflow Part 2: Data Augmentation" /><meta name="twitter:site" content="@dombombau" /><meta name="twitter:creator" content="@Dominic Jack" /><meta name="google-site-verification" content="google_meta_tag_verification" /> <script type="application/ld+json"> {"description":"Data augmentation is commonly used to artificially inflate the size of training datasets and teach networks invariances to various transformations. For example, image classification networks often train better when their datasets are augmented with random rotations, lighting adjustments and random flips. This article focuses on methods of performing augmentation that is both deterministic (the same each time a program is run) and pre-emptible (able to be interrupted and resumed without affecting results). Deciding which augmentations to apply for any given model is beyond the scope of this article.","author":{"@type":"Person","name":"Dominic Jack"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://jackd.github.io/posts/deterministic-tf-part-2/"},"headline":"Deterministic Tensorflow Part 2: Data Augmentation","dateModified":"2020-12-08T21:39:08+10:00","datePublished":"2020-12-06T11:00:01+10:00","url":"https://jackd.github.io/posts/deterministic-tf-part-2/","@type":"BlogPosting","image":"https://jackd.github.io/assets/img/posts/pre-emptible-venn.jpg","@context":"https://schema.org"}</script><title>Deterministic Tensorflow Part 2: Data Augmentation | jackd</title><link rel="shortcut icon" href="/assets/img/favicons/favicon.ico" type="image/x-icon"><link rel="icon" href="/assets/img/favicons/favicon.ico" type="image/x-icon"><link rel="apple-touch-icon" href="/assets/img/favicons/apple-icon.png"><link rel="apple-touch-icon" href="/assets/img/favicons/apple-icon-precomposed.png"><link rel="apple-touch-icon" sizes="57x57" href="/assets/img/favicons/apple-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/assets/img/favicons/apple-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/assets/img/favicons/apple-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/assets/img/favicons/apple-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/assets/img/favicons/apple-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/assets/img/favicons/apple-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/assets/img/favicons/apple-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/assets/img/favicons/apple-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/assets/img/favicons/apple-icon-180x180.png"><link rel="icon" type="image/png" sizes="192x192" href="/assets/img/favicons/android-icon-192x192.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicons/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/assets/img/favicons/favicon-96x96.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/img/favicons/favicon-16x16.png"><link rel="manifest" href="/assets/img/favicons/manifest.json"><meta name='msapplication-config' content='/assets/img/favicons/browserconfig.xml'><meta name="msapplication-TileColor" content="#ffffff"><meta name="msapplication-TileImage" content="/assets/img/favicons/ms-icon-144x144.png"><meta name="theme-color" content="#ffffff"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"><link rel="dns-prefetch" href="https://fonts.gstatic.com"><link rel="preconnect" href="https://www.google-analytics.com" crossorigin="use-credentials"><link rel="dns-prefetch" href="https://www.google-analytics.com"><link rel="preconnect" href="https://www.googletagmanager.com" crossorigin="anonymous"><link rel="dns-prefetch" href="https://www.googletagmanager.com"><link rel="preconnect" href="cdn.jsdelivr.net"><link rel="dns-prefetch" href="cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha256-LA89z+k9fjgMKQ/kq4OO2Mrf8VltYml/VES+Rg0fh20=" crossorigin="anonymous"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.11.2/css/all.min.css" integrity="sha256-+N4/V/SbAFiW1MPBCXnfnP9QSN3+Keu+NlB+0ev/YKQ=" crossorigin="anonymous"><link rel="preload" href="/assets/css/post.css" as="style"><link rel="stylesheet" href="/assets/css/post.css"><link rel="preload" as="style" href="/assets/css/lib/bootstrap-toc.min.css"><link rel="stylesheet" href="/assets/css/lib/bootstrap-toc.min.css" /> <script src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script> <script async src="https://cdn.jsdelivr.net/combine/npm/popper.js@1.15.0,npm/bootstrap@4/dist/js/bootstrap.min.js"></script> <script async src="/assets/js/post.min.js"></script> <script defer src="/app.js"></script><body data-spy="scroll" data-target="#toc"><div id="sidebar" class="d-flex flex-column"><div id="nav-wrapper"><div id="profile-wrapper" class="d-flex flex-column"><div id="avatar" class="d-flex justify-content-center"> <a href="/" alt="avatar"> <img src="/assets/img/dom-cvpr.jpg" alt="avatar" onerror="this.style.display='none'"> </a></div><div class="profile-text mt-3"><div class="site-title"> <a href="/">jackd</a></div><div class="site-subtitle font-italic">Deep Learning Researcher</div></div></div><ul class="nav flex-column"><li class="nav-item d-flex justify-content-center "> <a href="/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-home ml-xl-3 mr-xl-3 unloaded"></i> <span>HOME</span> </a><li class="nav-item d-flex justify-content-center "> <a href="/tabs/papers/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-scroll ml-xl-3 mr-xl-3 unloaded"></i> <span>PAPERS</span> </a><li class="nav-item d-flex justify-content-center "> <a href="/tabs/projects/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-code ml-xl-3 mr-xl-3 unloaded"></i> <span>PROJECTS</span> </a><li class="nav-item d-flex justify-content-center "> <a href="/tabs/about/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-info ml-xl-3 mr-xl-3 unloaded"></i> <span>ABOUT</span> </a><li class="nav-item d-flex justify-content-center "> <a href="/tabs/categories/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-stream ml-xl-3 mr-xl-3 unloaded"></i> <span>CATEGORIES</span> </a><li class="nav-item d-flex justify-content-center "> <a href="/tabs/tags/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-tags ml-xl-3 mr-xl-3 unloaded"></i> <span>TAGS</span> </a><li class="nav-item d-flex justify-content-center "> <a href="/tabs/archives/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-archive ml-xl-3 mr-xl-3 unloaded"></i> <span>ARCHIVES</span> </a></ul></div><div class="sidebar-bottom d-flex flex-wrap justify-content-around mt-4"> <span id="mode-toggle-wrapper"> <i class="mode-toggle fas fa-adjust"></i> <script type="text/javascript"> class ModeToggle { static get MODE_KEY() { return "mode"; } static get DARK_MODE() { return "dark"; } static get LIGHT_MODE() { return "light"; } constructor() { if (this.mode != null) { if (this.mode == ModeToggle.DARK_MODE) { if (!this.isSysDarkPrefer) { this.setDark(); } } else { if (this.isSysDarkPrefer) { this.setLight(); } } } var self = this; /* always follow the system prefers */ this.sysDarkPrefers.addListener(function() { if (self.mode != null) { if (self.mode == ModeToggle.DARK_MODE) { if (!self.isSysDarkPrefer) { self.setDark(); } } else { if (self.isSysDarkPrefer) { self.setLight(); } } self.clearMode(); } }); } /* constructor() */ setDark() { $('html').attr(ModeToggle.MODE_KEY, ModeToggle.DARK_MODE); sessionStorage.setItem(ModeToggle.MODE_KEY, ModeToggle.DARK_MODE); } setLight() { $('html').attr(ModeToggle.MODE_KEY, ModeToggle.LIGHT_MODE); sessionStorage.setItem(ModeToggle.MODE_KEY, ModeToggle.LIGHT_MODE); } clearMode() { $('html').removeAttr(ModeToggle.MODE_KEY); sessionStorage.removeItem(ModeToggle.MODE_KEY); } get sysDarkPrefers() { return window.matchMedia("(prefers-color-scheme: dark)"); } get isSysDarkPrefer() { return this.sysDarkPrefers.matches; } get isDarkMode() { return this.mode == ModeToggle.DARK_MODE; } get isLightMode() { return this.mode == ModeToggle.LIGHT_MODE; } get hasMode() { return this.mode != null; } get mode() { return sessionStorage.getItem(ModeToggle.MODE_KEY); } flipMode() { if (this.hasMode) { if (this.isSysDarkPrefer) { if (this.isLightMode) { this.clearMode(); } else { this.setLight(); } } else { if (this.isDarkMode) { this.clearMode(); } else { this.setDark(); } } } else { if (this.isSysDarkPrefer) { this.setLight(); } else { this.setDark(); } } } /* flipMode() */ } /* ModeToggle */ let toggle = new ModeToggle(); $(".mode-toggle").click(function() { toggle.flipMode(); }); </script> </span> <span class="icon-border"></span> <a href="https://github.com/jackd" aria-label="github" target="_blank" rel="noopener"> <i class="fab fa-github-alt"></i> </a> <a href="https://twitter.com/dombombau" aria-label="twitter" target="_blank" rel="noopener"> <i class="fab fa-twitter"></i> </a> <a href=" javascript:location.href = 'mailto:' + ['thedomjack','gmail.com'].join('@')" aria-label="email" > <i class="fas fa-envelope"></i> </a> <a href="/feed.xml" aria-label="rss" > <i class="fas fa-rss"></i> </a></div></div><div id="topbar-wrapper" class="row justify-content-center topbar-down"><div id="topbar" class="col-11 d-flex h-100 align-items-center justify-content-between"> <span id="breadcrumb"> <span> <a href="/"> Posts </a> </span> <span>Deterministic Tensorflow Part 2: Data Augmentation</span> </span> <i id="sidebar-trigger" class="fas fa-bars fa-fw"></i><div id="topbar-title"> Post</div><i id="search-trigger" class="fas fa-search fa-fw"></i> <span id="search-wrapper" class="align-items-center"> <i class="fas fa-search fa-fw"></i> <input class="form-control" id="search-input" type="search" aria-label="search" placeholder="Search..."> <i class="fa fa-times-circle fa-fw" id="search-cleaner"></i> </span> <span id="search-cancel" >Cancel</span></div></div><div id="main-wrapper"><div id="main"><div class="row"><div id="post-wrapper" class="col-12 col-lg-11 col-xl-8"><div class="post pl-1 pr-1 pl-sm-2 pr-sm-2 pl-md-4 pr-md-4"><h1 data-toc-skip>Deterministic Tensorflow Part 2: Data Augmentation</h1><div class="post-meta text-muted d-flex flex-column"><div> Posted <span class="timeago " data-toggle="tooltip" data-placement="bottom" title="Sun, Dec 6, 2020, 11:00 AM +1000" > Dec 6, 2020 <i class="unloaded">2020-12-06T11:00:01+10:00</i> </span> by <span class="author"> Dominic Jack </span></div><div> Updated <span class="timeago lastmod" data-toggle="tooltip" data-placement="bottom" title="Tue, Dec 8, 2020, 9:39 PM +1000" > Dec 8, 2020 <i class="unloaded">2020-12-08T21:39:08+10:00</i> </span></div></div><div class="post-content"> <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7 " data-src="/assets/img/posts/pre-emptible-venn.jpg" class="post-preview-img"><p>Data augmentation is commonly used to artificially inflate the size of training datasets and teach networks invariances to various transformations. For example, image classification networks often train better when their datasets are augmented with random rotations, lighting adjustments and random flips. This article focuses on methods of performing augmentation that is both <em>deterministic</em> (the same each time a program is run) and <em>pre-emptible</em> (able to be interrupted and resumed without affecting results). Deciding which augmentations to apply for any given model is beyond the scope of this article.</p><p>This is Part 2 of a 2-part series that looks at deterministic, pre-emptible tensorflow. <a href="../deterministic-tf-part-1">Part 1</a> looks at other aspects of training keras models.</p><h2 id="motivating-example">Motivating Example</h2><p>We’ll focus on the following simple example.</p><div class="language-python highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+</pre><td class="rouge-code"><pre><span class="kn">import</span> <span class="n">tensorflow</span> <span class="k">as</span> <span class="n">tf</span>
+
+
+<span class="k">def</span> <span class="nf">map_func</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="n">noise</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">uniform</span><span class="p">(())</span>
+    <span class="k">return</span> <span class="n">tf</span><span class="p">.</span><span class="nf">cast</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">tf</span><span class="p">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">+</span> <span class="n">noise</span>
+
+
+
+<span class="n">length</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">epochs</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">base</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="n">Dataset</span><span class="p">.</span><span class="nf">range</span><span class="p">(</span><span class="n">length</span><span class="p">)</span>
+<span class="n">ds</span> <span class="o">=</span> <span class="n">base</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span><span class="n">map_func</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">epochs</span><span class="p">):</span>
+    <span class="nf">print</span><span class="p">(</span><span class="nf">list</span><span class="p">(</span><span class="n">ds</span><span class="p">.</span><span class="nf">as_numpy_iterator</span><span class="p">()))</span>
+
+<span class="c1"># First run:
+# [0.36385977, 1.3164903, 2.7754397, 3.7108712, 4.238324]
+# [0.81800365, 1.971394, 2.1719813, 3.0710397, 4.3042865]
+# Second run:
+# [0.7445557, 1.1573758, 2.3454256, 3.5037904, 4.5108995]
+# [0.19572377, 1.0291697, 2.9865825, 3.8925676, 4.386469]
+</span></pre></table></code></div></div><p>For deterministic pipelines, we want augmentations to be different across epochs, but the same across different runs of the program. The above script satisfies the first criteria but fails the second.</p><p>The simplest way of removing sources of non-determinism is to set the random seed. Tensorflow makes this easy with <a href="https://www.tensorflow.org/api_docs/python/tf/random/set_seed">tf.random.set_seed</a>. However, the following example reveals some unintented consequences.</p><div class="language-python highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+</pre><td class="rouge-code"><pre><span class="n">tf</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">set_seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">ds</span> <span class="o">=</span> <span class="n">base</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span><span class="n">map_func</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">epochs</span><span class="p">):</span>
+    <span class="nf">print</span><span class="p">(</span><span class="nf">list</span><span class="p">(</span><span class="n">ds</span><span class="p">.</span><span class="nf">as_numpy_iterator</span><span class="p">()))</span>
+
+<span class="c1"># First run:
+# [0.019757032, 1.5400312, 2.5166783, 3.4683528, 4.1485605]
+# [0.019757032, 1.5400312, 2.5166783, 3.4683528, 4.1485605]
+# Second run run:
+# [0.019757032, 1.5400312, 2.5166783, 3.4683528, 4.1485605]
+# [0.019757032, 1.5400312, 2.5166783, 3.4683528, 4.1485605]
+</span></pre></table></code></div></div><p>Clearly we’ve gained deterministic behaviour, but we’ve broken our data augmentation. While this kind of determinism might be <a href="https://github.com/tensorflow/tensorflow/issues/44195">desirable in some circumstances</a>, it certainly is not what we want for data augmentation.</p><p>One simple work-around is to use a <a href="https://www.tensorflow.org/api_docs/python/tf/data/Dataset#repeat">repeat</a>ed dataset and managing epochs ourselves.</p><div class="language-python highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+</pre><td class="rouge-code"><pre><span class="n">tf</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">set_seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">ds</span> <span class="o">=</span> <span class="n">base</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span><span class="n">map_func</span><span class="p">).</span><span class="nf">repeat</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="n">iterator</span> <span class="o">=</span> <span class="n">ds</span><span class="p">.</span><span class="nf">as_numpy_iterator</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">epochs</span><span class="p">):</span>
+    <span class="nf">print</span><span class="p">([</span><span class="nf">next</span><span class="p">(</span><span class="n">iterator</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">length</span><span class="p">)])</span>
+<span class="c1"># [0.019757032, 1.5400312, 2.5166783, 3.4683528, 4.1485605]
+# [0.27331388,  1.1708031, 2.8691258, 3.7368858, 4.750617]
+</span></pre></table></code></div></div><p>The second involves managing random state explicitly using <a href="https://www.tensorflow.org/api_docs/python/tf/random/Generator">tf.random.Generator</a>s. Note this is the approach <a href="https://www.tensorflow.org/guide/random_numbers">encouraged by tensorflow for random number generation</a> moving forward.</p><div class="language-python highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+</pre><td class="rouge-code"><pre><span class="k">def</span> <span class="nf">rng_map_func</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="n">noise</span> <span class="o">=</span> <span class="n">rng</span><span class="p">.</span><span class="nf">uniform</span><span class="p">(())</span>
+    <span class="k">return</span> <span class="n">tf</span><span class="p">.</span><span class="nf">cast</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">tf</span><span class="p">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">+</span> <span class="n">noise</span>
+
+
+<span class="n">rng</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="n">Generator</span><span class="p">.</span><span class="nf">from_seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">ds</span> <span class="o">=</span> <span class="n">base</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span><span class="n">rng_map_func</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">num_repeats</span><span class="p">):</span>
+    <span class="nf">print</span><span class="p">(</span><span class="nf">list</span><span class="p">(</span><span class="n">ds</span><span class="p">.</span><span class="nf">as_numpy_iterator</span><span class="p">()))</span>
+<span class="c1"># [0.31179297, 1.18098,   2.7613525, 3.1380515, 4.0275183]
+# [0.4607407,  1.2356606, 2.1758924, 3.786038,  4.549028]
+</span></pre></table></code></div></div><p>Unfortunately, high-level augmentation ops (e.g. <a href="https://www.tensorflow.org/api_docs/python/tf/image/random_flip_left_right">tf.image.random_flip_left_right</a>) are currently still implemented in terms of [tf.random] ops, so you may have to re-implement these in terms of <code class="language-plaintext highlighter-rouge">tf.random.Generator</code>.</p><p>Of course, it’s good practice to parallelize data augmentation - particularly if it operates on individual examples (as opposed to batches). <a href="https://www.tensorflow.org/api_docs/python/tf/data/Dataset#map">Dataset.map</a> has <code class="language-plaintext highlighter-rouge">num_parallel_calls</code> and <code class="language-plaintext highlighter-rouge">deterministic</code> arguments exactly for this reason. Unfortunately, setting <code class="language-plaintext highlighter-rouge">deterministic=True</code> <a href="https://github.com/tensorflow/tensorflow/issues/44491">does not guarantee determinism</a> as shown in the following example.</p><div class="language-python highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+</pre><td class="rouge-code"><pre><span class="n">tf</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">set_seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">ds</span> <span class="o">=</span> <span class="n">base</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span><span class="n">map_func</span><span class="p">,</span> <span class="n">num_parallel_calls</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">deterministic</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">epochs</span><span class="p">):</span>
+    <span class="nf">print</span><span class="p">(</span><span class="nf">list</span><span class="p">(</span><span class="n">ds</span><span class="p">.</span><span class="nf">as_numpy_iterator</span><span class="p">()))</span>
+
+<span class="c1"># First run:
+# [0.14856052, 1.019757, 2.5400312, 3.4683528, 4.5166783]
+# [0.019757032, 1.1485605, 2.5400312, 3.4683528, 4.5166783]
+# Second run:
+# [0.5400312, 1.019757, 2.4683528, 3.5166783, 4.1485605]
+# [0.14856052, 1.019757, 2.5166783, 3.4683528, 4.5400314]
+</span></pre></table></code></div></div><p>At first glance it seems like we’ve somehow gained variation in augmentation at the cost of determinism across runs. Closer inspection however reveals the variation from the <code class="language-plaintext highlighter-rouge">tf.random.uniform</code> - the fractional parts - is the same for each iteration and each run, just applied to different elements. This indicates the non-determinism is due to a race condition rather than different sequence of random states. Setting <code class="language-plaintext highlighter-rouge">determinism=True</code> <a href="https://github.com/tensorflow/tensorflow/issues/44491#issuecomment-733892901">guarantees elements are returned in the order they are received, but says nothing about the order in which they are computed</a>. For this reason, switching to a <code class="language-plaintext highlighter-rouge">tf.random.Generator</code> will do nothing to solve the problem.</p><p>To resolve this, we need tie a different random state to each example. We can do this using a <a href="https://www.tensorflow.org/api_docs/python/tf/data/experimental/RandomDataset">tf.data.experimental.RandomDataset</a> and using <a href="https://www.tensorflow.org/api_docs/python/tf/random/stateless_uniform">tf.random.stateless_uniform</a> inside our map function.</p><div class="language-python highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+</pre><td class="rouge-code"><pre><span class="k">def</span> <span class="nf">stateless_map_func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">example_seed</span><span class="p">):</span>
+    <span class="n">noise</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">stateless_uniform</span><span class="p">((),</span> <span class="n">seed</span><span class="o">=</span><span class="n">example_seed</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">tf</span><span class="p">.</span><span class="nf">cast</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">tf</span><span class="p">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">+</span> <span class="n">noise</span>
+
+
+<span class="n">seeds</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="n">experimental</span><span class="p">.</span><span class="nc">RandomDataset</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">).</span><span class="nf">batch</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">ds</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="n">Dataset</span><span class="p">.</span><span class="nf">zip</span><span class="p">((</span><span class="n">base</span><span class="p">.</span><span class="nf">repeat</span><span class="p">(</span><span class="n">epochs</span><span class="p">),</span> <span class="n">seeds</span><span class="p">)).</span><span class="nf">map</span><span class="p">(</span>
+    <span class="n">stateless_map_func</span><span class="p">,</span> <span class="n">num_parallel_calls</span><span class="o">=</span><span class="mi">4</span>
+<span class="p">)</span>
+<span class="n">iterator</span> <span class="o">=</span> <span class="n">ds</span><span class="p">.</span><span class="nf">as_numpy_iterator</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">epochs</span><span class="p">):</span>
+    <span class="nf">print</span><span class="p">([</span><span class="nf">next</span><span class="p">(</span><span class="n">iterator</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">length</span><span class="p">)])</span>
+
+<span class="c1"># [0.99265265, 1.9662285, 2.6942484, 3.1795664, 4.277122]
+# [0.34727395, 1.9636483, 2.3396842, 3.0605106, 4.4146137]
+</span></pre></table></code></div></div><p>We have to be careful with the order of our dataset transformations. If we were to <code class="language-plaintext highlighter-rouge">repeat</code> after <a href="https://www.tensorflow.org/api_docs/python/tf/data/Dataset#zip">zip</a>ed, the seeds from our <code class="language-plaintext highlighter-rouge">RandomDataset</code> would be the same for each epoch and we would lose the variation we want for data augmentation.</p><p>Take aways:</p><ul><li>If using <code class="language-plaintext highlighter-rouge">tf.random</code> operations (e.g. <code class="language-plaintext highlighter-rouge">tf.random.uniform</code>) use a <code class="language-plaintext highlighter-rouge">repeated</code> datasets.<li>If using <code class="language-plaintext highlighter-rouge">tf.random</code> operations or methods from a <code class="language-plaintext highlighter-rouge">tf.random.Generator</code>, always <code class="language-plaintext highlighter-rouge">map</code> with <code class="language-plaintext highlighter-rouge">num_parallel_calls=1</code>.<li>For parallel, deterministic augmentation, use <code class="language-plaintext highlighter-rouge">tf.random.stateless_*</code> operations in conjunction with a <code class="language-plaintext highlighter-rouge">tf.random.experimental.RandomDataset</code>.</ul><h2 id="saving-and-restoring-state">Saving and Restoring State</h2><p>Pre-emptibility - the ability of a program to recover from a failure - is critical for long processes. Tensorflow has good state-saving capabilities provided by <a href="https://www.tensorflow.org/api_docs/python/tf/train/Checkpoint">Checkpoint</a>s. If we elect to manage state explicitly using a <code class="language-plaintext highlighter-rouge">tf.random.Generator</code>, then we simply save the <code class="language-plaintext highlighter-rouge">Generator</code> instance between epochs.</p><div class="language-python highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+</pre><td class="rouge-code"><pre><span class="n">path</span> <span class="o">=</span> <span class="sh">"</span><span class="s">/tmp/rng-state</span><span class="sh">"</span>
+<span class="n">ds</span> <span class="o">=</span> <span class="n">base</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span><span class="n">rng_map_func</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="nf">list</span><span class="p">(</span><span class="n">ds</span><span class="p">.</span><span class="nf">as_numpy_iterator</span><span class="p">()))</span>
+<span class="c1"># [0.31179297, 1.18098, 2.7613525, 3.1380515, 4.0275183]
+</span><span class="n">chkpt</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">train</span><span class="p">.</span><span class="nc">Checkpoint</span><span class="p">(</span><span class="n">rng</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span>
+<span class="n">chkpt</span><span class="p">.</span><span class="nf">write</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="nf">list</span><span class="p">(</span><span class="n">ds</span><span class="p">.</span><span class="nf">as_numpy_iterator</span><span class="p">()))</span>  <span class="c1"># different to above
+# [0.4607407, 1.2356606, 2.1758924, 3.786038, 4.549028]
+</span>
+<span class="n">chkpt</span><span class="p">.</span><span class="nf">read</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="nf">list</span><span class="p">(</span><span class="n">ds</span><span class="p">.</span><span class="nf">as_numpy_iterator</span><span class="p">()))</span>  <span class="c1"># same as above
+# [0.4607407, 1.2356606, 2.1758924, 3.786038, 4.549028]
+</span></pre></table></code></div></div><p>Unfortunately, this won’t work with pipelines involving other random transformations like <a href="https://www.tensorflow.org/api_docs/python/tf/data/Dataset#shuffle">shuffle</a> or operations that maintain an internal buffer like <a href="https://www.tensorflow.org/api_docs/python/tf/data/Dataset#prefetch">prefetch</a>. For those, we need to save the <a href="https://www.tensorflow.org/api_docs/python/tf/data/Iterator">iterator</a> rather than the <code class="language-plaintext highlighter-rouge">dataset</code>.</p><div class="language-python highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+</pre><td class="rouge-code"><pre><span class="n">random_ds</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="n">experimental</span><span class="p">.</span><span class="nc">RandomDataset</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">path</span> <span class="o">=</span> <span class="sh">"</span><span class="s">/tmp/iterator-state</span><span class="sh">"</span>
+<span class="n">ds</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="n">Dataset</span><span class="p">.</span><span class="nf">zip</span><span class="p">((</span><span class="n">base</span><span class="p">.</span><span class="nf">repeat</span><span class="p">(),</span> <span class="n">random_ds</span><span class="p">.</span><span class="nf">batch</span><span class="p">(</span><span class="mi">2</span><span class="p">)))</span>
+<span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span><span class="n">stateless_map_func</span><span class="p">,</span> <span class="n">num_parallel_calls</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">iterator</span> <span class="o">=</span> <span class="nf">iter</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">([</span><span class="n">iterator</span><span class="p">.</span><span class="nf">next</span><span class="p">().</span><span class="nf">numpy</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">length</span><span class="p">)])</span>
+<span class="c1"># [0.99265265, 1.9662285, 2.6942484, 3.1795664, 4.277122]
+</span><span class="n">chkpt</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">train</span><span class="p">.</span><span class="nc">Checkpoint</span><span class="p">(</span><span class="n">iterator</span><span class="o">=</span><span class="n">iterator</span><span class="p">)</span>
+<span class="n">chkpt</span><span class="p">.</span><span class="nf">write</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">([</span><span class="n">iterator</span><span class="p">.</span><span class="nf">next</span><span class="p">().</span><span class="nf">numpy</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">length</span><span class="p">)])</span>  <span class="c1"># different to above
+# [0.34727395, 1.9636483, 2.3396842, 3.0605106, 4.4146137]
+</span>
+<span class="n">chkpt</span><span class="p">.</span><span class="nf">read</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">([</span><span class="n">iterator</span><span class="p">.</span><span class="nf">next</span><span class="p">().</span><span class="nf">numpy</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">length</span><span class="p">)])</span>  <span class="c1"># same as above
+# [0.34727395, 1.9636483, 2.3396842, 3.0605106, 4.4146137]
+</span></pre></table></code></div></div><p>Note here we used stateless operations along with a random dataset. If we wanted to use a <code class="language-plaintext highlighter-rouge">Generator</code> (and <code class="language-plaintext highlighter-rouge">map</code> with <code class="language-plaintext highlighter-rouge">num_parallel_calls=1</code>) we could - we would just have to include it in our checkpoint alongside the iterator.</p><h2 id="decoupling-augmentation-from-rng-implementation">Decoupling Augmentation from RNG Implementation</h2><p>If we’re writing an augmentation function for an image classification pipeline, we want to focus on the ideas of augmentation - whether it is appropriate to flip horizontally and/or vertically, how much lighting variation we can get away with etc. We don’t want this code made more complicated with ideas related to the random number generation itself such as managing seeds for stateless operations or passing around <code class="language-plaintext highlighter-rouge">Generator</code> instances.</p><p>To illustrate this, consider the problem of applying a transformation with random elements to an existing dataset. We might use the following in our data pipeline code.</p><div class="language-python highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+</pre><td class="rouge-code"><pre><span class="k">def</span> <span class="nf">apply_stateless_map</span><span class="p">(</span>
+        <span class="n">dataset</span><span class="p">:</span> <span class="n">tf</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">map_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">map_kwargs</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="n">Dataset</span><span class="p">:</span>
+    <span class="n">seeds_dataset</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="n">experimental</span><span class="p">.</span><span class="nc">RandomDataset</span><span class="p">(</span><span class="n">seed</span><span class="p">).</span><span class="nf">batch</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">zipped</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="n">Dataset</span><span class="p">.</span><span class="nf">zip</span><span class="p">((</span><span class="n">seeds_dataset</span><span class="p">,</span> <span class="n">dataset</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">zipped</span><span class="p">.</span><span class="nb">map</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span><span class="n">map_func</span><span class="p">,</span> <span class="o">**</span><span class="n">map_kwargs</span><span class="p">)</span>
+</pre></table></code></div></div><p>An appropriate <code class="language-plaintext highlighter-rouge">map_func</code> might be defined as follows.</p><div class="language-python highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+</pre><td class="rouge-code"><pre><span class="k">def</span> <span class="nf">random_shift</span><span class="p">(</span><span class="n">element_seed</span><span class="p">,</span> <span class="n">element</span><span class="p">):</span>
+    <span class="n">tf</span><span class="p">.</span><span class="nf">shape</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+    <span class="n">shift</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">stateless_normal</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">element_seed</span><span class="p">)</span>
+    <span class="n">element</span> <span class="o">=</span> <span class="n">element</span> <span class="o">+</span> <span class="n">shift</span>
+    <span class="k">return</span> <span class="n">element</span>
+</pre></table></code></div></div><p>But what if we wanted to add an additional random transformation? A scale perhaps? We would rather not have to go into <code class="language-plaintext highlighter-rouge">apply_map</code> and change the shape of the seed. We could instead use <code class="language-plaintext highlighter-rouge">tf.random.stateless_split</code> to create a fresh seed from the existing one.</p><div class="language-python highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+</pre><td class="rouge-code"><pre><span class="k">def</span> <span class="nf">random_shift_and_scale</span><span class="p">(</span><span class="n">element_seed</span><span class="p">,</span> <span class="n">element</span><span class="p">):</span>
+    <span class="n">shape</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nf">shape</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+    <span class="n">shift</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">stateless_normal</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">)</span>
+    <span class="n">element</span> <span class="o">=</span> <span class="n">element</span> <span class="o">+</span> <span class="n">shift</span>
+    <span class="c1"># compute a fresh seed
+</span>    <span class="n">seed</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nf">squeeze</span><span class="p">(</span><span class="n">tf</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="n">experimental</span><span class="p">.</span><span class="nf">stateless_split</span><span class="p">(</span><span class="n">seed</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">scale</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">stateless_normal</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">stddev</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">mean</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">)</span>
+    <span class="n">element</span> <span class="o">=</span> <span class="n">element</span> <span class="o">*</span> <span class="n">scale</span>
+    <span class="k">return</span> <span class="n">element</span>
+</pre></table></code></div></div><p>This is better, but this <code class="language-plaintext highlighter-rouge">random_shift_and_scale</code> implementation depends on us using it with an implementation like <code class="language-plaintext highlighter-rouge">apply_stateless_map</code> above. What about if we wanted to switch to a generator-based pipeline implementation?</p><p>To resolve this, I created the small <a href="https://github.com/jackd/tfrng">tfrng</a> module to abstract away the random number generation (RNG) implementation details from the augmentation code, specifying it instead in the data pipelining stage.</p><p>A full guide is beyond the scope of this post, but the above functionality can be achieved with the code below. If that peaks your interest, check out this <a href="https://github.com/jackd/tfrng/blob/master/examples">more complete example</a></p><div class="language-python highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+</pre><td class="rouge-code"><pre><span class="k">def</span> <span class="nf">random_shift_and_scale</span><span class="p">(</span><span class="n">element</span><span class="p">):</span>
+    <span class="n">shape</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nf">shape</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+    <span class="n">shift</span> <span class="o">=</span> <span class="n">tfrng</span><span class="p">.</span><span class="nf">normal</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+    <span class="n">scale</span> <span class="o">=</span> <span class="n">tfrng</span><span class="p">.</span><span class="nf">normal</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">stddev</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">mean</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+    <span class="nf">return </span><span class="p">(</span><span class="n">element</span> <span class="o">+</span> <span class="n">shift</span><span class="p">)</span> <span class="o">*</span> <span class="n">scale</span>
+
+
+<span class="n">base</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="n">Dataset</span><span class="p">.</span><span class="nf">range</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">output_type</span><span class="o">=</span><span class="n">tf</span><span class="p">.</span><span class="n">float32</span><span class="p">)</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">base</span><span class="p">.</span><span class="nf">apply</span><span class="p">(</span>
+    <span class="n">tfrng</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="nf">stateless_map</span><span class="p">(</span><span class="n">random_shift_and_scale</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_parallel_calls</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="nf">list</span><span class="p">(</span><span class="n">dataset</span><span class="p">.</span><span class="nf">as_numpy_iterator</span><span class="p">()))</span>
+<span class="c1"># [-0.097278975, 0.8430341, 1.5062429, 1.0853299]
+</span>
+</pre></table></code></div></div><h2 id="putting-it-all-together">Putting it all together</h2><p>Of course, it wouldn’t be a machine learning post without an obligatory MNIST example, so let’s put everything we’ve learned together to make a deterministic, pre-emptible and performant training data pipeline with data augmentation and shuffling that varies across epochs.</p><div class="language-python highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+</pre><td class="rouge-code"><pre><span class="kn">import</span> <span class="n">tensorflow</span> <span class="k">as</span> <span class="n">tf</span>
+<span class="kn">import</span> <span class="n">tensorflow_datasets</span> <span class="k">as</span> <span class="n">tfds</span>
+
+<span class="n">AUTOTUNE</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="n">experimental</span><span class="p">.</span><span class="n">AUTOTUNE</span>
+
+
+<span class="k">def</span> <span class="nf">map_func</span><span class="p">(</span><span class="n">batch_seed</span><span class="p">,</span> <span class="n">element</span><span class="p">,</span> <span class="n">noise_scale</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
+    <span class="n">images</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">element</span>
+    <span class="n">images</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="nf">cast</span><span class="p">(</span><span class="n">images</span><span class="p">,</span> <span class="n">tf</span><span class="p">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">/</span> <span class="mi">255</span>
+    <span class="n">noise</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">stateless_uniform</span><span class="p">(</span>
+        <span class="n">tf</span><span class="p">.</span><span class="nf">shape</span><span class="p">(</span><span class="n">images</span><span class="p">),</span> <span class="n">seed</span><span class="o">=</span><span class="n">batch_seed</span><span class="p">,</span> <span class="n">maxval</span><span class="o">=</span><span class="n">noise_scale</span>
+    <span class="p">)</span>
+    <span class="n">images</span> <span class="o">=</span> <span class="p">(</span><span class="n">images</span> <span class="o">+</span> <span class="n">noise</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">noise_scale</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">images</span><span class="p">,</span> <span class="n">labels</span>
+
+
+<span class="n">tf</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">set_seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># influences shuffle
+</span><span class="n">base</span> <span class="o">=</span> <span class="n">tfds</span><span class="p">.</span><span class="nf">load</span><span class="p">(</span>
+    <span class="sh">"</span><span class="s">mnist</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">split</span><span class="o">=</span><span class="sh">"</span><span class="s">train</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">as_supervised</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+    <span class="n">shuffle_files</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>  <span class="c1"># MNIST only has 1 file, but this will make it work for others
+</span>    <span class="n">read_config</span><span class="o">=</span><span class="n">tfds</span><span class="p">.</span><span class="nc">ReadConfig</span><span class="p">(</span>
+        <span class="n">shuffle_seed</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>  <span class="c1"># dataset will be non-deterministic if we don't provide a seed
+</span>        <span class="n">skip_prefetch</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>  <span class="c1"># We'll prefetch batched elements later
+</span>    <span class="p">),</span>
+<span class="p">)</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">base</span><span class="p">.</span><span class="nf">repeat</span><span class="p">()</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">.</span><span class="nf">shuffle</span><span class="p">(</span>
+    <span class="mi">1024</span><span class="p">,</span>
+    <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">reshuffle_each_iteration</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>  <span class="c1"># note this is being applied to an infinite dataset
+</span><span class="p">)</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">.</span><span class="nf">batch</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span>
+
+<span class="n">seeds</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="n">experimental</span><span class="p">.</span><span class="nc">RandomDataset</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">).</span><span class="nf">batch</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="n">Dataset</span><span class="p">.</span><span class="nf">zip</span><span class="p">((</span><span class="n">seeds</span><span class="p">,</span> <span class="n">dataset</span><span class="p">))</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span><span class="n">map_func</span><span class="p">,</span> <span class="n">num_parallel_calls</span><span class="o">=</span><span class="n">AUTOTUNE</span><span class="p">,</span> <span class="n">deterministic</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">.</span><span class="nf">prefetch</span><span class="p">(</span><span class="n">AUTOTUNE</span><span class="p">)</span>
+
+<span class="n">iter0</span> <span class="o">=</span> <span class="p">[</span><span class="n">el</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nf">numpy</span><span class="p">()</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">dataset</span><span class="p">.</span><span class="nf">take</span><span class="p">(</span><span class="mi">5</span><span class="p">)]</span>
+<span class="n">iter1</span> <span class="o">=</span> <span class="p">[</span><span class="n">el</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nf">numpy</span><span class="p">()</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">dataset</span><span class="p">.</span><span class="nf">take</span><span class="p">(</span><span class="mi">5</span><span class="p">)]</span>
+
+<span class="k">for</span> <span class="n">i0</span><span class="p">,</span> <span class="n">i1</span> <span class="ow">in</span> <span class="nf">zip</span><span class="p">(</span><span class="n">iter0</span><span class="p">,</span> <span class="n">iter1</span><span class="p">):</span>
+    <span class="nf">assert </span><span class="p">(</span><span class="n">i0</span> <span class="o">==</span> <span class="n">i1</span><span class="p">).</span><span class="nf">all</span><span class="p">()</span>
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Consistent!</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># verify same between runs
+</span><span class="nf">print</span><span class="p">([</span><span class="n">i</span><span class="p">.</span><span class="nf">sum</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">iter0</span><span class="p">])</span>
+<span class="c1"># [16272.569, 16938.98, 16157.573, 16848.334, 16400.393]
+</span></pre></table></code></div></div><p>One thing to note is we’ll get slight bleeding of examples from one epoch to the next thanks to the number of examples not being divisible by the batch size, and the shuffle buffer taking examples from the new epoch before the old epoch is done (you can see this if you replace the base dataset with <code class="language-plaintext highlighter-rouge">base = tf.data.Dataset.range(10, output_type=tf.float32)</code>). In most cases this won’t be an issue, but if it were we could reorder our transformations to <code class="language-plaintext highlighter-rouge">shuffle</code>, <code class="language-plaintext highlighter-rouge">batch</code>, <code class="language-plaintext highlighter-rouge">repeat</code>, <code class="language-plaintext highlighter-rouge">zip</code>, <code class="language-plaintext highlighter-rouge">map</code>, <code class="language-plaintext highlighter-rouge">pretch</code>. This may be slightly less performant since the shuffle buffer will have to be filled from scratch each epoch.</p><p>Things get trickier if we need to apply the <code class="language-plaintext highlighter-rouge">map</code> before the <code class="language-plaintext highlighter-rouge">batch</code>, but I’ll leave that as an exercise (hint: check out <a href="https://www.tensorflow.org/api_docs/python/tf/data/Dataset#flat_map">flat_map</a>).</p><h2 id="conclusion">Conclusion</h2><p>As we’ve seen, there’s a lot more to deterministic data augmentation than just setting seeds. Having said that, hopefully this article has demonstrated that tnesorflow provides all the tools to write deterministic, pre-emptible, performant and maintainable pipelines.</p><p><em>Think I’m wrong? Found a typo or bug? Have a question or just think something needs further explanation? Let me know in the comments.</em></p></div><div class="post-tail-wrapper text-muted"><div class="post-meta mb-3"> <i class="far fa-folder-open fa-fw mr-1"></i> <a href='/categories/tensorflow/'>Tensorflow</a>, <a href='/categories/training/'>Training</a></div><div class="post-tags"> <i class="fa fa-tags fa-fw mr-1"></i> <a href="/tags/deterministic/" class="post-tag no-text-decoration" >deterministic</a> <a href="/tags/pre-emptible/" class="post-tag no-text-decoration" >pre-emptible</a></div><div class="post-tail-bottom d-flex justify-content-between align-items-center mt-3 pt-5 pb-2"><div class="license-wrapper"> This post is licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> by the author.</div><div class="share-wrapper"> <span class="share-label text-muted mr-1">Share</span> <span class="share-icons"> <a href="https://twitter.com/intent/tweet?text=Deterministic Tensorflow Part 2: Data Augmentation - jackd&url=https://jackd.github.io/posts/deterministic-tf-part-2/" data-toggle="tooltip" data-placement="top" title="Twitter" target="_blank" rel="noopener" aria-label="Twitter"> <i class="fa-fw fab fa-twitter"></i> </a> <a href="https://www.facebook.com/sharer/sharer.php?title=Deterministic Tensorflow Part 2: Data Augmentation - jackd&u=https://jackd.github.io/posts/deterministic-tf-part-2/" data-toggle="tooltip" data-placement="top" title="Facebook" target="_blank" rel="noopener" aria-label="Facebook"> <i class="fa-fw fab fa-facebook-square"></i> </a> <a href="https://telegram.me/share?text=Deterministic Tensorflow Part 2: Data Augmentation - jackd&url=https://jackd.github.io/posts/deterministic-tf-part-2/" data-toggle="tooltip" data-placement="top" title="Telegram" target="_blank" rel="noopener" aria-label="Telegram"> <i class="fa-fw fab fa-telegram"></i> </a> <i class="fa-fw fas fa-link small" onclick="copyLink()" data-toggle="tooltip" data-placement="top" title="Copy link"></i> </span></div></div></div></div></div><div id="panel-wrapper" class="col-xl-3 pl-2 text-muted topbar-down"><div class="access"><div id="access-lastmod" class="post"> <span>Recent Update</span><ul class="post-content pl-0 pb-1 ml-1 mt-2"><li><a href="/posts/mpt/">Negative Gearing and the CGT Discount: A Modern Portfolio Theory Analysis</a><li><a href="/posts/retention/">Retention LLMs: Analysing Algorithms and Alternative Implementations</a><li><a href="/posts/simple-fast-attention/">Simple Fast Attention: Causal Implementation Experiments</a><li><a href="/posts/doherty-init/">Digging into Doherty: Implications of Initialization</a><li><a href="/posts/generalized-eig-jvp/">Generalized Eigenvalue Problem Derivatives</a></ul></div><div id="access-tags"> <span>Trending Tags</span><div class="d-flex flex-wrap mt-3 mb-1 mr-3"> <a class="post-tag" href="/tags/performance/">performance</a> <a class="post-tag" href="/tags/benchmarks/">benchmarks</a> <a class="post-tag" href="/tags/autograd/">autograd</a> <a class="post-tag" href="/tags/covid/">covid</a> <a class="post-tag" href="/tags/deterministic/">deterministic</a> <a class="post-tag" href="/tags/epidemiology/">epidemiology</a> <a class="post-tag" href="/tags/jax/">jax</a> <a class="post-tag" href="/tags/pre-emptible/">pre emptible</a> <a class="post-tag" href="/tags/finance/">finance</a> <a class="post-tag" href="/tags/parallel/">parallel</a></div></div></div><div id="toc-wrapper" class="pl-0 pr-4 mb-5"> <span class="pl-3 pt-2 mb-2">Contents</span><nav id="toc" data-toggle="toc"></nav></div></div></div><div class="row"><div class="col-12 col-lg-11 col-xl-8"><div id="post-extend-wrapper" class="pl-1 pr-1 pl-sm-2 pr-sm-2 pl-md-4 pr-md-4"><div id="related-posts" class="mt-5 mb-2 mb-sm-4"><h3 class="pt-2 mt-1 mb-4 ml-1" data-toc-skip>Further Reading</h3><div class="card-deck mb-4"><div class="card"> <a href="/posts/deterministic-tf-part-1/"><div class="card-body"> <span class="timeago small" > Dec 6, 2020 <i class="unloaded">2020-12-06T11:00:00+10:00</i> </span><h3 class="pt-0 mt-1 mb-3" data-toc-skip>Deterministic Tensorflow Part 1: Model Training</h3><div class="text-muted small"><p> Reproducibility is critical to any scientific endeavour, and machine learning is no exception. Releasing code that generates results from papers is an important step in addressing this, but difficu...</p></div></div></a></div><div class="card"> <a href="/posts/micro-benchmarks-tf2/"><div class="card-body"> <span class="timeago small" > Jan 23, 2021 <i class="unloaded">2021-01-23T11:00:01+10:00</i> </span><h3 class="pt-0 mt-1 mb-3" data-toc-skip>Micro-benchmarking in TF2</h3><div class="text-muted small"><p> TL;DR: TF2 Benchmarks don’t have to be hard to write. See example at the bottom and/or tfbm. “Premature optimization is the root of all evil.” – Donald Knuth This quote is ubiquitous in softw...</p></div></div></a></div><div class="card"> <a href="/posts/simple-fast-attention/"><div class="card-body"> <span class="timeago small" > Nov 30, 2022 <i class="unloaded">2022-11-30T11:00:01+10:00</i> </span><h3 class="pt-0 mt-1 mb-3" data-toc-skip>Simple Fast Attention: Causal Implementation Experiments</h3><div class="text-muted small"><p> Having looked at google-research’s fast attention tensorflow implementation and corresponding blog post, I was left scratching my head about the causal attention implementation. This post discuss...</p></div></div></a></div></div></div><div class="post-navigation d-flex justify-content-between"> <a href="/posts/deterministic-tf-part-1/" class="btn btn-outline-primary"><p>Deterministic Tensorflow Part 1: Model Training</p></a> <a href="/posts/generalized-eig-jvp/" class="btn btn-outline-primary"><p>Generalized Eigenvalue Problem Derivatives</p></a></div><div id="disqus" class="pt-2 pb-2"><p class="font-italic text-center text-muted small"> Comments powered by <a href="https://disqus.com/">Disqus</a>.</p></div><script src="/assets/js/lib/jquery.disqusloader.min.js"></script> <script> var options = { scriptUrl: '//jackd.disqus.com/embed.js', disqusConfig: function() { this.page.url = 'https://jackd.github.io/posts/deterministic-tf-part-2/'; this.page.identifier = '/posts/deterministic-tf-part-2/'; } }; $.disqusLoader('#disqus', options); </script></div></div></div><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lozad/dist/lozad.min.js"></script> <script type="text/javascript"> const imgs = document.querySelectorAll('#post-wrapper img'); const observer = lozad(imgs); observer.observe(); </script><footer class="d-flex w-100 justify-content-center"><div class="d-flex justify-content-between align-items-center"><div class="footer-left"><p class="mb-0"> © 2025 <a href="https://twitter.com/dombombau">Dominic Jack</a>. <span data-toggle="tooltip" data-placement="top" title="Except where otherwise noted, the blog posts on this site are licensed under the Creative Commons Attribution 4.0 International (CC BY 4.0) License by the author.">Some rights reserved.</span></p></div><div class="footer-right"><p class="mb-0"> Powered by <a href="https://jekyllrb.com" target="_blank" rel="noopener">Jekyll</a> with <a href="https://github.com/cotes2020/jekyll-theme-chirpy/" target="_blank" rel="noopener">Chirpy</a> theme.</p></div></div></footer></div><div id="search-result-wrapper" class="d-flex justify-content-center unloaded"><div class="col-12 col-xl-11 post-content"><div id="search-hints"><h4 class="text-muted mb-4">Trending Tags</h4><a class="post-tag" href="/tags/performance/">performance</a> <a class="post-tag" href="/tags/benchmarks/">benchmarks</a> <a class="post-tag" href="/tags/autograd/">autograd</a> <a class="post-tag" href="/tags/covid/">covid</a> <a class="post-tag" href="/tags/deterministic/">deterministic</a> <a class="post-tag" href="/tags/epidemiology/">epidemiology</a> <a class="post-tag" href="/tags/jax/">jax</a> <a class="post-tag" href="/tags/pre-emptible/">pre emptible</a> <a class="post-tag" href="/tags/finance/">finance</a> <a class="post-tag" href="/tags/parallel/">parallel</a></div><div id="search-results" class="d-flex flex-wrap justify-content-center text-muted mt-3"></div></div></div></div><div id="mask"></div><a id="back-to-top" href="#" aria-label="back-to-top" class="btn btn-lg btn-box-shadow" role="button"> <i class="fas fa-angle-up"></i> </a> <script src="https://cdn.jsdelivr.net/npm/simple-jekyll-search@1.7.3/dest/simple-jekyll-search.min.js"></script> <script> SimpleJekyllSearch({ searchInput: document.getElementById('search-input'), resultsContainer: document.getElementById('search-results'), json: '/assets/js/data/search.json', searchResultTemplate: '<div class="pl-1 pr-1 pl-sm-2 pr-sm-2 pl-lg-4 pr-lg-4 pl-xl-0 pr-xl-0"> <a href="https://jackd.github.io{url}">{title}</a><div class="post-meta d-flex flex-column flex-sm-row text-muted mt-1 mb-1"><div class="mr-sm-4"><i class="far fa-folder fa-fw"></i>{categories}</div><div><i class="fa fa-tag fa-fw"></i>{tags}</div></div><p>{snippet}</p></div>', noResultsText: '<p class="mt-5">Oops! No result founds.</p>' }); </script> <script async src="https://www.googletagmanager.com/gtag/js?id="></script> <script> window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', ''); </script>
