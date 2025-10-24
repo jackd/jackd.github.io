@@ -40,10 +40,10 @@ $
 z^\prime_t = \frac{\sum_{i=1}^{t-1} \exp(k_i + i w)v_i + \exp(u - w + k_t + tw)v_t}{\sum_{i=1}^{t-1} \exp(k_i + i w) + \exp(u - w + k_t + tw)}.
 $
 
-If we let $\tilde{k}_n = k_n + n w$, this simplifies to
+If we let $k^\prime_n = k_n + n w$, this simplifies to
 
 $
-z^\prime_t = \frac{\sum_{i=1}^{t-1} \exp(\tilde{k}_i)v_i + \exp(u - w + \tilde{k}_t)v_t}{\sum_{i=1}^{t-1} \exp(\tilde{k}_i) + \exp(u - w + \tilde{k}_t)}.
+z^\prime_t = \frac{\sum_{i=1}^{t-1} \exp(k^\prime_i)v_i + \exp(u - w + k^\prime_t)v_t}{\sum_{i=1}^{t-1} \exp(k^\prime_i) + \exp(u - w + k^\prime_t)}.
 $
 
 This can be computed efficiently using a cumulative sum.
