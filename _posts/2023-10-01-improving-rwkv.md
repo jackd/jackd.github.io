@@ -37,7 +37,7 @@ $
 Multiplying top and bottom by $\exp((t - 1)w)$ yields
 
 $
-z^\prime_t = \frac{\sum_{i=1}^{t-1} \exp(k_i + i w)v_i + \exp(u - w + k_t + t_w)v_t}{\sum_{i=1}^{t-1} \exp(k_i + i w) + \exp(u - w + k_t + t_w)}.
+z^\prime_t = \frac{\sum_{i=1}^{t-1} \exp(k_i + i w)v_i + \exp(u - w + k_t + tw)v_t}{\sum_{i=1}^{t-1} \exp(k_i + i w) + \exp(u - w + k_t + tw)}.
 $
 
 If we let $\tilde{k}_n = k_n + n w$, this simplifies to
@@ -68,7 +68,7 @@ def wkv(v, k, u, w):
     return wkv_numerator(v, k, u, w) / wkv_numerator(jnp.ones_like(v), k, u, w)
 ```
 
-There are multiple benefits to this include:
+There are multiple benefits to this including:
 
 - simplicity: no custom cuda kernels or hand-written backward passes; and
 - parallelism: `cumsum` can be parallelized along the `T` dimension.

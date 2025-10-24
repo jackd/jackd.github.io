@@ -47,7 +47,9 @@ $\left[A \circ \sum_j \mathbf{u}_j \mathbf{v}_j^T\right]\mathbf{x} = \sum_j D(\m
 
 where $D(\mathbf{z})$ is the diagonal matrix with diagonal values $\mathbf{z}$. This means we can express our fast causal attention output as
 
-$N = \sum_m D(\mathbf{q}_m) L D(\mathbf{k}_m) V.
+$
+N = \sum_m D(\mathbf{q}_m) L D(\mathbf{k}_m) V.
+$
 
 where $\mathbf{q}_m$ and $\mathbf{k}_m$ are the $m^\text{th}$ columns of Q and K respectively.
 
