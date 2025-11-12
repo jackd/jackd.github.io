@@ -15,7 +15,7 @@ While some people I talk to can appreciate that perspective, the overwhelming co
 
 Recently there have been a host of articles discussing the wealth divide between owners and renters amongst retirees. While this wealth divide no doubt exists, the conclusions these articles draw are absolutely preposterous, and the solutions they propose will only exacerbate the problem.
 
-As with all things I write, this is not financial advice. I'm not a financial adviser - just a guy on the internet who isn't afraid of numbers. Check out the [code](https://github.com/rent-forever) if you want to see how the plots below were generated or run your own simulations.
+As with all things I write, this is not financial advice. I'm not a financial adviser - just a guy on the internet who isn't afraid of numbers. Check out the [code](https://github.com/jackd/rent-forever) if you want to see how the plots below were generated or run your own simulations.
 
 ## Lamborghini Owners are Better Off In Retirement
 
@@ -41,7 +41,7 @@ In the home owner case:
 - after the acquisition cost has been paid, $60,000 is left for a deposit;
 - they get a 30 year bank loan for the outstanding $500,000 at 6.5%;
 - the property appreciates in value at 3.5% per year; and
-- maintenance, insurance, and other ongoing costs total to $2,500 in the first year, increasing by 3% per year.
+- maintenance, insurance, council rates, and other ongoing costs total to $2,500 in the first year, increasing by 3% per year.
 
 In the renting case:
 
@@ -172,9 +172,9 @@ Michael Read writes in the [Australian Financial Review](https://www.afr.com/pol
 
 Maybe superannuation won't be enough because _nobody contributes to their super until after they've paid off their mortgage_, Michael. Superannuation alone is _precisely_ what could spare Australians from a financially precarious retirement, _especially if they're struggling to afford a mortgage_ - they just need financial education rather your blatant fear-mongering.
 
-This article from [The Conversation](https://theconversation.com/retiree-home-ownership-is-about-to-plummet-soon-little-more-than-half-will-own-where-they-live-115255) and later shared by the [Grattan Institute](https://grattan.edu.au/news/fewer-retirees-will-own-their-home-in-future-and-that-has-big-implications-for-policy/) has a whole section titled "You'll be OK if you own". It doesn't say you may be better off if you don't.
-
 Our national broadcaster ran a [story](https://www.abc.net.au/news/2024-10-23/australia-housing-market-retirement-with-a-mortgage/104484746) about a 66 year old civil servant who was delaying retirement to pay down her mortgage. No Linda! Put it into your super! Get the tax break and pull it out as soon as you retire to pay down the mortgage!
+
+While it's a little more dated, this article from [The Conversation](https://theconversation.com/retiree-home-ownership-is-about-to-plummet-soon-little-more-than-half-will-own-where-they-live-115255) and later shared by the [Grattan Institute](https://grattan.edu.au/news/fewer-retirees-will-own-their-home-in-future-and-that-has-big-implications-for-policy/) has a whole section titled "You'll be OK if you own". It doesn't say you may be better off if you choose not to.
 
 I could go on. All these articles relate later entry into the housing market to poorer retirement outcomes. At no point in any of them does anyone even hint that maybe - just maybe - the causal factor might be the amount invested into wealth appreciating assets rather than the particular choice of assets, or that the solution to retirement funding might be to use Australia's system designed specifically for retirement funding.
 
