@@ -402,7 +402,7 @@ This will obviously encourage home ownership beyond what's implied by the curren
 
 The argument for having a CGT discount is that capital appreciating assets are already "taxed" by inflation, and that they shouldn't be double taxed, i.e. only the increase in value beyond inflation should be explicitly taxed. Prior to the CGT discount an indexing method was used, but that was an accounting nightmare and I don't believe anyone would like to go back to that. Having said that, I fail to understand why this argument doesn't apply to other investment related gains and expenses like rent, dividends, or interest payments. If we simply applied it across the board, the end result would be a reduction in the tax rate by 50% for investment income. This would still make the system somewhat regressive, but it would completely eliminate the market distortions.
 
-![Returns with 50% tax discount applied to all investment income/deductions and 5.5% interest](assets/img/posts/cgt-market-distortions/equilibrium-interest-55-all-tax-discount.png)
+![Returns with 50% tax discount applied to all investment income/deductions and 5.5% interest](/assets/img/posts/cgt-market-distortions/equilibrium-interest-55-all-tax-discount.png)
 
 _Returns with 50% tax discount applied to all investment income/deductions and 5.5% interest_
 
