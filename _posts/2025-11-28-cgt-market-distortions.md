@@ -382,6 +382,10 @@ _Final net worths for a first home builder's grant in the highest tax bracket wi
 
 Clearly, the optimal behaviour is to build the home, collect the grant and resell it immediately (assuming you can sell it for what you paid for it plus the grant), then renting forever. Delaying sale always leaves you worse off, and if you wait more than 8 years you'd have been better off skipping it entirely. Similarly, if you buy a home on the last day of the simulated period, you'll net yourself a net worth higher by the grant value than if you hadn't (though going forward you'll be netting a lower return than if you hadn't, unless you immediately sell). In all other circumstances, you're better off just sticking to shares.
 
+## Interventions That Might Work
+
+Having established that the governments' current schemes don't actually change the behaviour of rational agents at equilibrium to promote long term home ownership, let's investigate some other policies that aren't actually being considered but might actually have an affect on long term outcomes.
+
 ### 25% CGT Discount
 
 Reducing the capital gains tax discount to 25% has been considered by [government](https://www.pbo.gov.au/sites/default/files/2023-03/PER414%20%20ALP%20%20Negative%20gearing%20and%20capital%20gains%20tax%20CGT%20reform.PDF) and recommended by [the Grattan Institute](https://grattan.edu.au/wp-content/uploads/2023/04/Grattan-Back-in-Black-1.pdf). To be clear, there is no evidence that any major political party is currently considering a change to the CGT discount - but we'll still consider it here because it's the only thing that comes close to a feasible redress.
@@ -393,6 +397,35 @@ This lessens the distortions, and under the other model assumptions used here me
 _Returns with 25% CGT discount and 5.5% interest_
 
 This will obviously encourage home ownership beyond what's implied by the current system, but the slice of the population that's viable for (people earning over \\$135,000-\\$190,000 who can afford to buy a home outright, or those earning more than \\$190,000) is fairly slim.
+
+### 50% Investment Income Discount
+
+The argument for having a CGT discount is that capital appreciating assets are already "taxed" by inflation, and that they shouldn't be double taxed, i.e. only the increase in value beyond inflation should be explicitly taxed. Prior to the CGT discount an indexing method was used, but that was an accounting nightmare and I don't believe anyone would like to go back to that. Having said that, I fail to understand why this argument doesn't apply to other investment related gains and expenses like rent, dividends, or interest payments. If we simply applied it across the board, the end result would be a reduction in the tax rate by 50% for investment income. This would still make the system somewhat regressive, but it would completely eliminate the market distortions.
+
+![Returns with 50% tax discount applied to all investment income/deductions and 5.5% interest](assets/img/posts/cgt-market-distortions/equilibrium-interest-55-all-tax-discount.png)
+
+_Returns with 50% tax discount applied to all investment income/deductions and 5.5% interest_
+
+A few things to note here compared to the 50% CGT discount case with the same interest rate:
+
+- each investment option gives a higher after-tax return for every tax bracket;
+- agents at each tax bracket have the same optimal choice;
+- the optimal choice is to leverage your own home first, and pour additional funds beyond a certain leverage point into shares;
+  - the critical leverage point depends on your tax rate; and
+  - even if an owner-occupied dwelling is paid off in full (suboptimal for all tax brackets), the returns are better than in the CGT discount case;
+- more leverage for owner-occupier investments (i.e. lowering deposit requirements) would improve returns.
+
+In every case, at equilibrium, every investor/owner occupier is better off. Now this might sound unsurprising given that it's the result of the government broadening a tax discount scheme. What is surprising is that this doesn't necessarily mean the government will collect less revenue. Every investor in this case is paying a positive effective tax rate. If we assume most investment comes from those in the top tax bracket - investors who could previously have been paying zero tax through careful weighting of shares and negatively geared property - there's every reason to believe the government would also collect more in tax revenue. The main losers in this case would be the banks, as investors are no longer inclined to borrow money to invest in assets with returns lower than the interest rate charged.
+
+The one thing this model doesn't address is what happens to rents. Note this change results in equilibrium net rental yields going from 1.1% to 2.3%. If we assume a non-interest ongoing costs of 1% annually, this would be equivalent to a 55% increase in rents _relative to the price of properties_. That's not the same as a 55% increase in rent, because in the short term, property prices would fall. Supply and demand will ultimately determine rent and property prices individually - this analysis only deals with their ratio.
+
+#### Do the Wealthy Need More Tax Breaks?
+
+Now I'll stress I'm not advocating this as the tax policy. There's a strong argument that we should be moving towards a more progressive tax policy, rather than giving more discounts to those with enough excess income to invest. I'll preempt this criticism with two points.
+
+Firstly, the discount doesn't need to be 50%. It could be 40%, or 25%. It could start at 50% and get reduced subsequently. The market distortions are eliminated with any value. It might be easiest to start at 50% because there's no way it can be misconstrued as a tax increase.
+
+Secondly, and much more importantly, I don't think we should let perfect get in the way of good. Like it or not, the wealthy have undue influence on policy, and a solution that leaves them no worse off while benefitting the whole of society would be better than failing to enact a more just system. I see it akin to compensating slave owners when slavery was abolished. Was it _fair_ that slave owners got paid to release their slaves, when the slaves themselves got nothing? Absolutely not - but without the slave owners on board, slavery would have persistent longer than it did. It's certainly uncomfortable, but sometimes we have to take the least uncomfortable option.
 
 ## What if I'm Talking to a Normal Human?
 
