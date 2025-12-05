@@ -419,13 +419,21 @@ In every case, at equilibrium, every investor/owner occupier is better off. Now 
 
 Note this change results in equilibrium net rental yield of 2.3%. Assuming non-interest operating costs of 1%, that means a gross rental yield of 3.3% - which is roughly consistent with [today's house market](https://www.firstlinks.com.au/asset-class-australia-offers-best-value-now). It's quite a bit higher than the net equilibrium yield with the normal CGT discount of 1.1%. This suggests that if we were to make the change shortly the effect on rental yields will be for them to stabilize, but enacting it later would result in a more dramatic change.
 
+#### Comparison to Other Tax Models
+
+This uniform investment tax model is very close to two existing models.
+
+Way back in 2008, the [Henry Tax Review](https://en.wikipedia.org/wiki/Henry_Tax_Review) suggested replacing the CGT discount with a Savings Income Discount (SID). This proposed SID would be set slightly lower than the CGT discount at 40%, but apply to rental income and interest payments. While interest payments could still be deducted against regular income, the SID would be applied first, closing the tax arbitrage opportunity that distorts markets.
+
+Another model similar to the above that works well overseas - most prominently in Scandinavian countries - is the dual income system (DIS), where labor income is siloed from investment income and each is taxed separately, potentially at different rates. This has [the support of independent MP Allegra Spender](https://www.theguardian.com/commentisfree/2025/aug/21/australia-economic-roundtable-idea-wages-taxes-income).
+
 #### Do the Wealthy Need More Tax Breaks?
 
 Now I'll stress I'm not advocating this as the tax policy. There's a strong argument that we should be moving towards a more progressive tax policy, rather than giving more discounts to those with enough excess income to invest. I'll preempt this criticism with two points.
 
 Firstly, the discount doesn't need to be 50%. It could be 40%, or 25%. It could start at 50% and get reduced subsequently. The market distortions are eliminated with any value. It might be easiest to start at 50% because there's no way it can be misconstrued as a tax increase.
 
-Secondly, and much more importantly, I don't think we should let perfect get in the way of good. Like it or not, the wealthy have undue influence on policy, and a solution that leaves them no worse off while benefitting the whole of society would be better than failing to enact a more just system. I see it akin to compensating slave owners when slavery was abolished. Was it _fair_ that slave owners got paid to release their slaves, when the slaves themselves got nothing? Absolutely not - but without the slave owners on board, slavery would have persistent longer than it did. It's certainly uncomfortable, but sometimes we have to take the least uncomfortable option.
+Secondly, and much more importantly, I don't think we should let perfect get in the way of good. Like it or not, the wealthy have undue influence on policy, and a solution that leaves them no worse off while benefitting the whole of society would be better than failing to enact a more just system. I see it akin to compensating slave owners when slavery was abolished. Was it _fair_ that slave owners got paid to release their slaves, when the slaves themselves were never compensated for their servitude? Absolutely not - but without the slave owners on board, slavery would have persisted for longer. It's certainly uncomfortable, but sometimes we have to take the least uncomfortable option.
 
 ## What if I'm Talking to a Normal Human?
 
@@ -451,9 +459,11 @@ It's tempting to look at a market where renting is always preferable to buying a
 
 There are certainly non-financial benefits to owning your own home. I haven't discussed these non-financial benefits throughout this paper, but that does not mean they don't exist. In reality, many people will buy their home despite it being suboptimal financially. I'm not saying that's a bad idea - just that it's potentially expensive. Luxury cars are expensive, but that doesn't stop people buying them. Maybe think twice before taking out a loan with a 5% deposit to purchase one though.
 
-### Housing Swaps: Ownership with [Extra Steps](https://www.youtube.com/shorts/vHI8XIE_vWE)
+### A Nation of Lifelong Rentvesters
 
-If you're in the top tax bracket, and you have a friend in the top tax bracket, at some point you'll be better off buying their property and renting it to them, and letting them buy your property and renting it off them. I'm not saying this is a good outcome - but it's the outcome we deserve for electing politicians who refuse to fix the system.
+Rentvesting - renting a property where you want to live while investing in another property - is a common investment strategy in Australia. On it's surface, it seems inherently inefficient - there are now 2 landlords, 2 tenants, and possibly 2 real estate agents, where there could be a single owner-occupier. There are certainly cases where it makes sense - e.g. if you want cannot afford to purchase where you want to live but still want to get your foot on the property ladder. However, the tax system at equilibrium incentivizes this practice even if you can afford to buy the place you want to live in.
+
+More specifically, if you're a home owner in the top tax bracket in a market at equilibrium, you're better off selling your house to your neighbor and renting it back off them, then buying their house and renting it to them. The practical inefficiencies of this are distressing to say the least - but we have chosen a tax system that enshrines this misalignment between practical efficiency and market efficiency.
 
 ## Conclusions
 
