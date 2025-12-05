@@ -459,7 +459,7 @@ It's tempting to look at a market where renting is always preferable to buying a
 
 There are certainly non-financial benefits to owning your own home. I haven't discussed these non-financial benefits throughout this paper, but that does not mean they don't exist. In reality, many people will buy their home despite it being suboptimal financially. I'm not saying that's a bad idea - just that it's potentially expensive. Luxury cars are expensive, but that doesn't stop people buying them. Maybe think twice before taking out a loan with a 5% deposit to purchase one though.
 
-### A Nation of Lifelong Rentvesters
+### A Nation of Lifelong Rentvestors
 
 Rentvesting - renting a property where you want to live while investing in another property - is a common investment strategy in Australia. On it's surface, it seems inherently inefficient - there are now 2 landlords, 2 tenants, and possibly 2 real estate agents, where there could be a single owner-occupier. There are certainly cases where it makes sense - e.g. if you want cannot afford to purchase where you want to live but still want to get your foot on the property ladder. However, the tax system at equilibrium incentivizes this practice even if you can afford to buy the place you want to live in.
 
